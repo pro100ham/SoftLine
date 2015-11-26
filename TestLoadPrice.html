@@ -1,0 +1,418 @@
+﻿<!DOCTYPE html>
+<html lang="uk" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--Сonfigure settings and page styles-->
+    <title>Внесення даних моніторингу</title>
+    <meta charset="utf-8" />
+    <meta charset="utf-8" http-equiv="X-UA-Compatible" content="IE=10" />
+
+    <link rel="stylesheet" type="text/css" href="kendo.common.min.css" />
+    <!--<link rel="stylesheet" type="text/css" href="/WebResources/isv_kendo.default.min.css" />-->
+    <link rel="stylesheet" type="text/css" href="kendo.metro.min.css" />
+    <link rel="stylesheet" type="text/css" href="kendo.dataviz.min.css" />
+
+
+    <script src=" ../../../ClientGlobalContext.js.aspx" type="text/javascript"></script>
+    <script type="text/javascript">
+        Xrm = Xrm || window.parent.Xrm;
+    </script>
+    <script src="jquery.js" type="text/javascript"></script>
+    <script src="jquery.min.js" type="text/javascript"></script>
+    <script src="json2.js" type="text/javascript"></script>
+    <script src="XrmServiceToolkit.js" type="text/javascript"></script>
+    <script src="kendo.all.min.js" type="text/javascript"></script>
+
+    <!--<script src="/WebResources/isv_baseformscripts.js" type="text/javascript"></script>-->
+    <style type="text/css">
+        body {
+            font-family: Segoe UI;
+            font-size: 11px;
+            background-color: #f6f8fa;
+        }
+
+        #paymentsGrid > * {
+            font-family: Segoe UI;
+            font-size: 11px;
+            background-color: #f6f8fa;
+        }
+
+        #paymentsGrid {
+            width: 100%;
+            left: 0px;
+        }
+
+
+
+        #error {
+            color: red;
+        }
+    </style>
+</head>
+<!--Сonfigure page layout-->
+<body>
+    <div id="error"></div>
+    <div id="paymentsGrid"></div>
+    <div id="wizzardWindow" />
+    <!--external functions-->
+    <script type="text/javascript">
+        var TERMS_OF_CONFIDENCE;
+        var PAYMENT_STATUS;
+        var EAContractAnnualCode;
+        var defaultTermsOfConfidence;
+        var OpportunityId;
+        var InitialItemsCount;
+        var opportunityIncomeDate = null;
+        var currentDataSource;
+        var wizzardWindow;
+        var IsUpdated = false;
+        var IsCreated = false;
+        var IsDeleted = false;
+        var ChangesSaved;
+        var CommitmentLevel = { Commited: 1 };
+
+        function IsDirty() {
+            return doesDataSourceHaveChanges(currentDataSource);
+        }
+        function SavePayments(saveCallback) {
+            var paymentGrid = $("#paymentsGrid").data("kendoGrid");
+            if (!doesDataSourceHaveChanges(currentDataSource)) {
+                IsUpdated = true;
+                IsCreated = true;
+                IsDeleted = true;
+                return true;
+            }
+            ChangesSaved = saveCallback;
+            paymentGrid.saveChanges();
+            return false;
+        }
+
+        function SetPaymentDate(paymentDate) {
+            opportunityIncomeDate = paymentDate;
+        }
+
+        function HasChanges() {
+            return doesDataSourceHaveChanges(currentDataSource);
+        }
+
+        function doesDataSourceHaveChanges(ds) {
+            var dirty = false;
+            if (!ds)
+                return dirty;
+            if (ds._data && ds._data.length !== InitialItemsCount)
+                dirty = true;
+            if (ds._data) {
+                $.each(ds._data, function () {
+                    if (this.dirty == true) {
+                        dirty = true;
+                    }
+                });
+            }
+            if (ds._destroyed && ds._destroyed.length > 0) dirty = true;
+
+            return dirty;
+        }
+    </script>
+    <script type="text/javascript">
+        Xrm = Xrm || window.parent.Xrm;
+        var XrmConverter = function () {
+            this.ToXrmEntity = function (gridEntity) {
+                var resultEntity;
+                resultEntity = new XrmServiceToolkit.Soap.BusinessEntity("new_monitoring");
+                resultEntity.attributes["new_purchase_price_nikolaev"] = { type: "Money", value: gridEntity.Nikolaev };
+                resultEntity.attributes["new_purchase_price_odessa"] = { type: "Money", value: gridEntity.Odessa };
+                if (gridEntity.Sourse)
+                    resultEntity.attributes["new_data_source"] = gridEntity.Sourse;
+                if (gridEntity.AnnotationNikolaev)
+                    resultEntity.attributes["new_comments_price_nikolaev"] = gridEntity.AnnotationNikolaev;
+                if (gridEntity.AnnotationOdessa)
+                    resultEntity.attributes["new_comments_price_odessa"] = gridEntity.AnnotationOdessa;
+
+                resultEntity.attributes["new_monitoring_date"] = { type: "dateTime", value: new Date() };
+
+                resultEntity.attributes["new_cropid"] = { id: gridEntity.Crop.CategoryID, logicalName: "product", type: "EntityReference" };
+                resultEntity.attributes["new_accountid"] = { id: gridEntity.NameAccount.ID, logicalName: "account", type: "EntityReference" };
+                return resultEntity;
+            };
+            this.ToGridEntity = function (crmEntity) {
+                return {
+                    //Id: crmEntity.id,
+                    NameAccount: crmEntity.attributes["name"] ? crmEntity.attributes["name"].value : null,
+                    Crop: { CategoryID: 0, CategoryName: "" },
+                    Nikolaev: 0,
+                    Odessa: 0
+                }
+            };
+        };
+        var CrmConnector = function () {
+            this.ReadData = function () {
+                /*var fetchXml = "<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>" +
+                              "<entity name='account'>" +
+                                "<attribute name='name' />" +
+                                "<attribute name='primarycontactid' />" +
+                                "<attribute name='telephone1' />" +
+                                "<attribute name='accountid' />" +
+                                "<order attribute='name' descending='false' />" +
+                              "</entity>" +
+                            "</fetch>";
+                var result = XrmServiceToolkit.Soap.Fetch(fetchXml);
+                var stronglyTypedResult = [];
+                var xrmConverter = new XrmConverter();
+                for (var i = 0; i < result.length; i++) {
+                    stronglyTypedResult.push(
+                        xrmConverter.ToGridEntity(result[i]));
+                }
+                return stronglyTypedResult;*/
+
+                return {
+                    // Id: crmEntity.id,
+                    NameAccount: { ID: '0', AccountName: 'Вибрати' },
+                    Crop: { CategoryID: '0', CategoryName: 'Вибрати' },
+                    Nikolaev: 0,
+                    Odessa: 0
+                }
+            };
+            this.UpdateEntity = function (targetEntity) {
+                XrmServiceToolkit.Soap.Update(targetEntity);
+            };
+            this.CreateEntity = function (targetEntity) {
+                XrmServiceToolkit.Soap.Create(targetEntity);
+            };
+            this.RetrieveOptionSetValues = function (optionSetName) {
+                var optionSets = XrmServiceToolkit.Soap.RetrieveAttributeMetadata("isv_plannedpayment", optionSetName, false);
+                var result = [];
+                if (optionSets.length == 0)
+                    return null;
+                var itemsCount = optionSets[0].OptionSet.Options.length;
+                for (var i = 0; i < itemsCount; i++) {
+                    result.push({
+                        Id: optionSets[0].OptionSet.Options[i].Value,
+                        Name: optionSets[0].OptionSet.Options[i].Label.UserLocalizedLabel.Label
+                    });
+                }
+                return result;
+            };
+            this.DisableEntity = function (entityId) {
+                XrmServiceToolkit.Soap.SetState("isv_plannedpayment", entityId, 1, 2);
+            };
+            this.RetrieveOpportunity = function (opportunityId) {
+                var oppEntity = XrmServiceToolkit.Soap.Retrieve("opportunity", opportunityId, ["isv_commitmentlevel", "estimatedvalue", "new_margin", "CFPType"]);
+                return oppEntity;
+            };
+        };
+
+        var GridEvents = function () {
+            var checkedIds = {};
+            var onDataBound = function (e) {
+                var view = this.dataSource.view();
+                for (var i = 0; i < view.length; i++) {
+                    if (checkedIds[view[i].id]) {
+                        this.tbody.find("tr[data-uid='" + view[i].uid + "']")
+                        .addClass("k-state-selected")
+                        .find(".rowSelect")
+                        .attr("checked", "checked");
+                    }
+                }
+                $(".rowSelect").click(GridEvents.OnRowSelect);
+                var gridControl = this;
+                $.each(this.tbody.find('tr'), function () {
+                    var model = gridControl.dataItem(this);
+
+                    var $currentRow = $('[data-uid=' + model.uid + ']');
+                    if (!model.IsPayed) {
+                        $currentRow.css('background-color', 'white');
+                        $currentRow.css('color', 'black');
+                    }
+                    else {
+                        //$currentRow.find("input[class='rowSelect']").prop("disabled", true);
+                        $currentRow.find(".k-grid-delete").hide();
+                    }
+                });
+            };
+            return {
+                OnDataBound: onDataBound
+            }
+        }();
+        $(document).ready(function () {
+            $("#error").html("");
+            kendo.culture("uk-UA");
+
+            InitialItemsCount = 0;
+
+            var crmConnector = new CrmConnector();
+            var isOpportnuityLar = false;
+
+            var xrmConverter = new XrmConverter();
+            currentDataSource = new kendo.data.DataSource({
+                transport: {
+                    read: function (e) {
+                        // on success
+                        var crmData = crmConnector.ReadData();
+                        InitialItemsCount = crmData.length;
+                        e.success(crmData);
+                    }
+                },
+                pageSize: 25,
+                batch: true,
+                schema: {
+                    model: {
+                        id: "Id",
+                        fields: {
+                            NameAccount: { defaultValue: { ID: 0, AccountName: "" } },
+                            Crop: { defaultValue: { CategoryID: 0, CategoryName: "" } },
+                            Nikolaev: { type: "number", defaultValue: 0 },
+                            Odessa: { type: "number", defaultValue: 0 }
+                        }
+                    }
+                }
+            });
+            $("#paymentsGrid").kendoGrid({
+                height: 800,
+                dataSource: currentDataSource,
+                pageable: {
+                    refresh: true,
+                    pageSizes: true,
+                    buttonCount: 5
+                },
+                editable: true,
+                //edit: GridEvents.OnEdit,
+                sortable: {
+                    mode: "single",
+                    allowUnsort: false
+                },
+                dataBound: GridEvents.OnDataBound,
+                toolbar: ["create"],
+                columns: [
+                    {
+                        field: "Crop",
+                        title: "Культура",
+                        width: "120px",
+                        editor: categoryDropDownEditor,
+                        template: "#=Crop.CategoryName#"
+                    },
+                    {
+                        field: "NameAccount",
+                        title: "Контрагент",
+                        width: "120px",
+                        editor: accountDropDownEditor,
+                        template: "#=NameAccount.AccountName#"
+                    },
+                    {
+                        field: "Nikolaev",
+                        title: "Ціна закупівлі, Миколаїв",
+                        format: "{0:n2}",
+                        width: "120px"
+                    },
+                    {
+                        field: "Odessa",
+                        title: "Ціна закупівлі, Одеса",
+                        format: "{0:n2}",
+                        width: "120px"
+                    },
+                    {
+                        field: "AnnotationNikolaev",
+                        title: "Коментарі до ціни Миколаїв",
+                        width: "120px"
+                    },
+                    {
+                        field: "AnnotationOdessa",
+                        title: "Коментарі до ціни Одеса",
+                        width: "120px"
+                    },
+                    {
+                        field: "Sourse",
+                        title: "Джерело інформації",
+                        width: "120px"
+                    }
+                ]
+            });
+            var $toolbar = $(".k-grid-toolbar");
+            $toolbar.append(
+                '<div class="k-button k-button-icontext " id="CreateButton" onclick="createRecord()">Зберегти</div>');
+        });
+
+        function categoryDropDownEditor(container, options) {
+            $('<input required data-text-field="CategoryName" data-value-field="CategoryID" data-bind="value:' + options.field + '"/>')
+                .appendTo(container)
+                .kendoDropDownList({
+                    autoBind: false,
+                    dataSource: {
+                        transport: {
+                            read: function (e) {
+                                var a = [];
+                                a.push({ CategoryID: '0', CategoryName: 'Вибрати' });
+                                var fetchXml = "<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>" +
+                                              "<entity name='product'>" +
+                                                "<attribute name='name' />" +
+                                                "<attribute name='productnumber' />" +
+                                                "<attribute name='description' />" +
+                                                "<attribute name='statecode' />" +
+                                                "<attribute name='productstructure' />" +
+                                                "<order attribute='productnumber' descending='false' />" +
+                                              "</entity>" +
+                                            "</fetch>";
+                                var result = XrmServiceToolkit.Soap.Fetch(fetchXml);
+                                for (var i = 0; i < result.length; i++) {
+                                    a.push({ CategoryID: result[i].attributes["productid"].value, CategoryName: result[i].attributes["name"].value });
+                                }
+                                e.success(a);
+                            }
+                        }
+                    }
+                });
+        }
+        function accountDropDownEditor(container, options) {
+            $('<input required data-text-field="AccountName" data-value-field="ID" data-bind="value:' + options.field + '"/>')
+                .appendTo(container)
+                .kendoDropDownList({
+                    autoBind: false,
+                    dataSource: {
+                        transport: {
+                            read: function (e) {
+                                var a = [];
+                                a.push({ ID: '0', AccountName: 'Вибрати' });
+                                var fetchXml = "<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>" +
+                                                  "<entity name='account'>" +
+                                                    "<attribute name='name' />" +
+                                                    "<attribute name='primarycontactid' />" +
+                                                    "<attribute name='telephone1' />" +
+                                                    "<attribute name='accountid' />" +
+                                                    "<order attribute='name' descending='false' />" +
+                                                  "</entity>" +
+                                                "</fetch>";
+                                var result = XrmServiceToolkit.Soap.Fetch(fetchXml);
+                                for (var i = 0; i < result.length; i++) {
+                                    a.push({ ID: result[i].attributes["accountid"].value, AccountName: result[i].attributes["name"].value });
+                                }
+                                e.success(a);
+                            }
+                        }
+                    }
+                });
+        }
+
+        createRecord = function () {
+            var xrmConverter = new XrmConverter();
+            var crmConnector = new CrmConnector();
+            var itemsCount = $("#paymentsGrid").data().kendoGrid._data.length;
+            if (itemsCount == 0)
+                return;
+            IsCreated = false;
+            $("#error").html("");
+            try {
+                for (var i = 0; i < itemsCount; i++) {
+                    var currentItem = xrmConverter.ToXrmEntity($("#paymentsGrid").data().kendoGrid._data[i]);
+                    crmConnector.CreateEntity(currentItem);
+                }
+                IsCreated = true;
+                location.reload();
+                //ChangesSaved(true);
+                //e.success(e.data);
+            } catch (ex) {
+                $("#error").html(ex.toString().replace("Error:", ""));
+                IsCreated = true;
+                //ChangesSaved(false);
+            }
+        };
+    </script>
+</body>
+</html>

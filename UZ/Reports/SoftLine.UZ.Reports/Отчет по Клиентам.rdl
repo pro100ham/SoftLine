@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <Body>
+    <Height>2.13in</Height>
+    <Style />
+  </Body>
+  <Width>9.9375in</Width>
+  <Page>
+    <LeftMargin>1in</LeftMargin>
+    <RightMargin>1in</RightMargin>
+    <TopMargin>1in</TopMargin>
+    <BottomMargin>1in</BottomMargin>
+    <Style />
+  </Page>
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources>
+    <DataSource Name="DataSource">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString>Data Source=msk02crm13web08;Initial Catalog=UZ_MSCRM</ConnectString>
+        <IntegratedSecurity>true</IntegratedSecurity>
+      </ConnectionProperties>
+      <rd:SecurityType>Integrated</rd:SecurityType>
+      <rd:DataSourceID>6176c500-27e2-45ed-8da8-b607f95242f0</rd:DataSourceID>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="DataSet1">
+      <Query>
+        <DataSourceName>DataSource</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@from">
+            <Value>=Parameters!from.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@to">
+            <Value>=Parameters!to.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandText>SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+select CONVERT(varchar(12),op.new_data_oplati,103) as 'Период',
+		op.new_nimber_agreem as 'Договор',
+		op.new_account_agreemidname as 'Клиент',
+		op.owneridname as 'Менеджер',
+		op.new_summa as 'ИТОГО Оборот',
+		op.new_marjausd as 'ИТОГО Маржа'
+From Filterednew_oplata op
+where op.new_data_oplati &gt; @from and op.new_data_oplati &lt; @to
+Group by op.new_data_oplati, 
+		op.new_nimber_agreem,
+		op.new_account_agreemidname,
+		op.owneridname,
+		op.new_summa,
+		op.new_marjausd</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+      <Fields>
+        <Field Name="Период">
+          <DataField>Период</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Договор">
+          <DataField>Договор</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Клиент">
+          <DataField>Клиент</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Менеджер">
+          <DataField>Менеджер</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ИТОГО_Оборот">
+          <DataField>ИТОГО Оборот</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="ИТОГО_Маржа">
+          <DataField>ИТОГО Маржа</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <ReportParameters>
+    <ReportParameter Name="from">
+      <DataType>DateTime</DataType>
+      <Prompt>from</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="to">
+      <DataType>DateTime</DataType>
+      <Prompt>to</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <Language>ru-RU</Language>
+  <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
+  <rd:ReportUnitType>Inch</rd:ReportUnitType>
+  <rd:ReportID>98021ecc-a98c-47aa-9ef4-72da6399b042</rd:ReportID>
+</Report>
