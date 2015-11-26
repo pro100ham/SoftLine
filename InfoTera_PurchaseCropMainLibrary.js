@@ -65,54 +65,64 @@ softline.CreateDealMethods = function () {
     if ((GetFieldValue("new_supplier_price_mykolaiv") != null ||
         GetFieldValue("new_purch_price_mykolaiv") != null) &&
         GetFieldValue("new_offer_status") == 100000001) {
-        var supplierM = GetFieldValue("new_supplier_price_mykolaiv");
-        var puchaseM = GetFieldValue("new_purch_price_mykolaiv");
-        if (supplierM <= puchaseM) {
-            var entity = {};
-            entity.new_purchase_offerid = { Id: Xrm.Page.data.entity.getId(), LogicalName: Xrm.Page.data.entity.getEntityName() };
-            if (GetFieldValue("new_crop") != null)
-                entity.new_cropid = { Id: GetFieldValue("new_crop")[0].id, LogicalName: GetFieldValue("new_crop")[0].typename };
-            if (GetFieldValue("new_supplier_price") != null)
-                entity.new_purchase_opport_price = GetFieldValue("new_supplier_price");
-            if (GetFieldValue("new_city") != null)
-                entity.new_supplier_address_cityid = { Id: GetFieldValue("new_city")[0].id, LogicalName: GetFieldValue("new_city")[0].typename };
-            if (GetFieldValue("new_area") != null)
-                entity.new_supplier_address_areaid = { Id: GetFieldValue("new_area")[0].id, LogicalName: GetFieldValue("new_area")[0].typename };
-            if (GetFieldValue("new_region") != null)
-                entity.new_supplier_address_regionid = { Id: GetFieldValue("new_region")[0].id, LogicalName: GetFieldValue("new_region")[0].typename };
-            if (GetFieldValue("new_supplierid") != null)
-                entity.new_supplierid = { Id: GetFieldValue("new_supplierid")[0].id, LogicalName: GetFieldValue("new_supplierid")[0].typename };
-            if (GetFieldValue("new_warehouse") != null)
-                entity.new_supplier_warehouseid = { Id: GetFieldValue("new_warehouse")[0].id, LogicalName: GetFieldValue("new_warehouse")[0].typename };
-            if (GetFieldValue("new_elevator") != null)
-                entity.new_supplier_elevatorid = { Id: GetFieldValue("new_elevator")[0].id, LogicalName: GetFieldValue("new_elevator")[0].typename };
-            if (GetFieldValue("new_ship_basisid") != null)
-                entity.new_ship_basisid = { Id: GetFieldValue("new_ship_basisid")[0].id, LogicalName: GetFieldValue("new_ship_basisid")[0].typename };
-            if (GetFieldValue("new_urchase_method") != null)
-                entity.new_shipping_method = { Value: GetFieldValue("new_urchase_method") };
-            if (GetFieldValue("new_supplier_volume") != null)
-                entity.new_purchase_amount = GetFieldValue("new_supplier_volume");
-            if (GetFieldValue("new_supplier_price_mykolaiv") != null) {
-                entity.new_recommended_price = { Value: supplierO.toString().replace('.', ',') };
-                entity.new_purchase_opport_price = { Value: supplierO.toString().replace('.', ',') };
-            }
-
-            XrmServiceToolkit.Rest.Create(entity,
-                "new_purchase_dealSet",
-                function (result) {
-                    var reletivePath = "/userdefined/edit.aspx?etc=10021";
-                    reletivePath = reletivePath + "&id=";
-                    var windowName = "_blank";
-                    var serverUrl = Xrm.Page.context.getClientUrl();
-                    if (serverUrl != null && serverUrl != "" && result.new_purchase_dealId.replace("{", "").replace("}", "") != null) {
-                        serverUrl = serverUrl + reletivePath;
-                        serverUrl = serverUrl + result.new_purchase_dealId.replace("{", "").replace("}", "");
-                        window.open(serverUrl);
+        var supplierN = GetFieldValue("new_supplier_price_mykolaiv");
+        var puchasN = GetFieldValue("new_purch_price_mykolaiv");
+        if (supplierN <= puchasN) {
+            XrmServiceToolkit.Rest.RetrieveMultiple("new_portSet",null,function(data){
+                var entity = {};
+                entity.new_purchase_offerid = { Id: Xrm.Page.data.entity.getId(), LogicalName: Xrm.Page.data.entity.getEntityName() };
+                if (GetFieldValue("new_crop") != null)
+                    entity.new_cropid = { Id: GetFieldValue("new_crop")[0].id, LogicalName: GetFieldValue("new_crop")[0].typename };
+                if (GetFieldValue("new_supplier_price") != null)
+                    entity.new_purchase_opport_price = GetFieldValue("new_supplier_price");
+                if (GetFieldValue("new_city") != null)
+                    entity.new_supplier_address_cityid = { Id: GetFieldValue("new_city")[0].id, LogicalName: GetFieldValue("new_city")[0].typename };
+                if (GetFieldValue("new_area") != null)
+                    entity.new_supplier_address_areaid = { Id: GetFieldValue("new_area")[0].id, LogicalName: GetFieldValue("new_area")[0].typename };
+                if (GetFieldValue("new_region") != null)
+                    entity.new_supplier_address_regionid = { Id: GetFieldValue("new_region")[0].id, LogicalName: GetFieldValue("new_region")[0].typename };
+                if (GetFieldValue("new_supplierid") != null)
+                    entity.new_supplierid = { Id: GetFieldValue("new_supplierid")[0].id, LogicalName: GetFieldValue("new_supplierid")[0].typename };
+                if (GetFieldValue("new_warehouse") != null)
+                    entity.new_supplier_warehouseid = { Id: GetFieldValue("new_warehouse")[0].id, LogicalName: GetFieldValue("new_warehouse")[0].typename };
+                if (GetFieldValue("new_elevator") != null)
+                    entity.new_supplier_elevatorid = { Id: GetFieldValue("new_elevator")[0].id, LogicalName: GetFieldValue("new_elevator")[0].typename };
+                if (GetFieldValue("new_ship_basisid") != null)
+                    entity.new_ship_basisid = { Id: GetFieldValue("new_ship_basisid")[0].id, LogicalName: GetFieldValue("new_ship_basisid")[0].typename };
+                if (GetFieldValue("new_urchase_method") != null)
+                    entity.new_shipping_method = { Value: GetFieldValue("new_urchase_method") };
+                if (GetFieldValue("new_supplier_volume") != null)
+                    entity.new_purchase_amount = GetFieldValue("new_supplier_volume");
+                if (GetFieldValue("new_supplier_price_mykolaiv") != null) {
+                    entity.new_recommended_price = { Value: supplierN.toString().replace('.', ',') };
+                    entity.new_purchase_opport_price = { Value: supplierN.toString().replace('.', ',') };
+                }
+                if (data != null && data.length != 0){
+                    for(var i=0;i<data.length;i++){
+                        if (data[i].new_cityid != null && data[i].new_name == "Миколаїв")
+                            entity.new_ship_portid = { Id: data[i].new_portId, LogicalName: 'new_port'};
                     }
-                },
-                function (error) { console.log(error.message); },
-                false);
-
+                }
+            
+                XrmServiceToolkit.Rest.Create(entity,
+                    "new_purchase_dealSet",
+                    function (result) {
+                        var reletivePath = "/userdefined/edit.aspx?etc=10021";
+                        reletivePath = reletivePath + "&id=";
+                        var windowName = "_blank";
+                        var serverUrl = Xrm.Page.context.getClientUrl();
+                        if (serverUrl != null && serverUrl != "" && result.new_purchase_dealId.replace("{", "").replace("}", "") != null) {
+                            serverUrl = serverUrl + reletivePath;
+                            serverUrl = serverUrl + result.new_purchase_dealId.replace("{", "").replace("}", "");
+                            window.open(serverUrl);
+                        }
+                    },
+                    function (error) { console.log(error.message); },
+                    false);
+            },    function (error) {
+                console.log("in error handler");
+                console.log(error.message);
+            },function(){},false);
         }
         else {
             alert("Ціна постачальника Миколаїв вища за ціну закупівлі Миколаїв. Картка угоди не може мути створеною.");
@@ -124,51 +134,61 @@ softline.CreateDealMethods = function () {
         var supplierO = GetFieldValue("new_supplier_price_odesa");
         var puchaseO = GetFieldValue("new_purch_price_odesa");
         if (supplierO <= puchaseO) {
-            var entity = {};
-            entity.new_purchase_offerid = { Id: Xrm.Page.data.entity.getId(), LogicalName: Xrm.Page.data.entity.getEntityName() };
-            if (GetFieldValue("new_crop") != null)
-                entity.new_cropid = { Id: GetFieldValue("new_crop")[0].id, LogicalName: GetFieldValue("new_crop")[0].typename };
-            if (GetFieldValue("new_supplier_price") != null)
-                entity.new_purchase_opport_price = GetFieldValue("new_supplier_price");
-            if (GetFieldValue("new_city") != null)
-                entity.new_supplier_address_cityid = { Id: GetFieldValue("new_city")[0].id, LogicalName: GetFieldValue("new_city")[0].typename };
-            if (GetFieldValue("new_area") != null)
-                entity.new_supplier_address_areaid = { Id: GetFieldValue("new_area")[0].id, LogicalName: GetFieldValue("new_area")[0].typename };
-            if (GetFieldValue("new_region") != null)
-                entity.new_supplier_address_regionid = { Id: GetFieldValue("new_region")[0].id, LogicalName: GetFieldValue("new_region")[0].typename };
-            if (GetFieldValue("new_supplierid") != null)
-                entity.new_supplierid = { Id: GetFieldValue("new_supplierid")[0].id, LogicalName: GetFieldValue("new_supplierid")[0].typename };
-            if (GetFieldValue("new_warehouse") != null)
-                entity.new_supplier_warehouseid = { Id: GetFieldValue("new_warehouse")[0].id, LogicalName: GetFieldValue("new_warehouse")[0].typename };
-            if (GetFieldValue("new_elevator") != null)
-                entity.new_supplier_elevatorid = { Id: GetFieldValue("new_elevator")[0].id, LogicalName: GetFieldValue("new_elevator")[0].typename };
-            if (GetFieldValue("new_ship_basisid") != null)
-                entity.new_ship_basisid = { Id: GetFieldValue("new_ship_basisid")[0].id, LogicalName: GetFieldValue("new_ship_basisid")[0].typename };
-            if (GetFieldValue("new_urchase_method") != null)
-                entity.new_shipping_method = { Value: GetFieldValue("new_urchase_method") };
-            if (GetFieldValue("new_supplier_volume") != null)
-                entity.new_purchase_amount = GetFieldValue("new_supplier_volume");
-            if (GetFieldValue("new_supplier_price_odesa") != null) {
-                entity.new_recommended_price = { Value: supplierO.toString().replace('.', ',') };
-                entity.new_purchase_opport_price = { Value: supplierO.toString().replace('.', ',') };
-            }
-
-
-            XrmServiceToolkit.Rest.Create(entity,
-                "new_purchase_dealSet",
-                function (result) {
-                    var reletivePath = "/userdefined/edit.aspx?etc=10021";
-                    reletivePath = reletivePath + "&id=";
-                    var windowName = "_blank";
-                    var serverUrl = Xrm.Page.context.getClientUrl();
-                    if (serverUrl != null && serverUrl != "" && result.new_purchase_dealId.replace("{", "").replace("}", "") != null) {
-                        serverUrl = serverUrl + reletivePath;
-                        serverUrl = serverUrl + result.new_purchase_dealId.replace("{", "").replace("}", "");
-                        window.open(serverUrl);
+            XrmServiceToolkit.Rest.RetrieveMultiple("new_portSet",null,function(data){
+                var entity = {};
+                entity.new_purchase_offerid = { Id: Xrm.Page.data.entity.getId(), LogicalName: Xrm.Page.data.entity.getEntityName() };
+                if (GetFieldValue("new_crop") != null)
+                    entity.new_cropid = { Id: GetFieldValue("new_crop")[0].id, LogicalName: GetFieldValue("new_crop")[0].typename };
+                if (GetFieldValue("new_supplier_price") != null)
+                    entity.new_purchase_opport_price = GetFieldValue("new_supplier_price");
+                if (GetFieldValue("new_city") != null)
+                    entity.new_supplier_address_cityid = { Id: GetFieldValue("new_city")[0].id, LogicalName: GetFieldValue("new_city")[0].typename };
+                if (GetFieldValue("new_area") != null)
+                    entity.new_supplier_address_areaid = { Id: GetFieldValue("new_area")[0].id, LogicalName: GetFieldValue("new_area")[0].typename };
+                if (GetFieldValue("new_region") != null)
+                    entity.new_supplier_address_regionid = { Id: GetFieldValue("new_region")[0].id, LogicalName: GetFieldValue("new_region")[0].typename };
+                if (GetFieldValue("new_supplierid") != null)
+                    entity.new_supplierid = { Id: GetFieldValue("new_supplierid")[0].id, LogicalName: GetFieldValue("new_supplierid")[0].typename };
+                if (GetFieldValue("new_warehouse") != null)
+                    entity.new_supplier_warehouseid = { Id: GetFieldValue("new_warehouse")[0].id, LogicalName: GetFieldValue("new_warehouse")[0].typename };
+                if (GetFieldValue("new_elevator") != null)
+                    entity.new_supplier_elevatorid = { Id: GetFieldValue("new_elevator")[0].id, LogicalName: GetFieldValue("new_elevator")[0].typename };
+                if (GetFieldValue("new_ship_basisid") != null)
+                    entity.new_ship_basisid = { Id: GetFieldValue("new_ship_basisid")[0].id, LogicalName: GetFieldValue("new_ship_basisid")[0].typename };
+                if (GetFieldValue("new_urchase_method") != null)
+                    entity.new_shipping_method = { Value: GetFieldValue("new_urchase_method") };
+                if (GetFieldValue("new_supplier_volume") != null)
+                    entity.new_purchase_amount = GetFieldValue("new_supplier_volume");
+                if (GetFieldValue("new_supplier_price_odesa") != null) {
+                    entity.new_recommended_price = { Value: supplierO.toString().replace('.', ',') };
+                    entity.new_purchase_opport_price = { Value: supplierO.toString().replace('.', ',') };
+                }
+                if (data != null && data.length != 0){
+                    for(var i=0;i<data.length;i++){
+                        if (data[i].new_cityid != null && data[i].new_name == "Одеса")
+                            entity.new_ship_portid = { Id: data[i].new_portId, LogicalName: 'new_port'};
                     }
-                },
-                function (error) { console.log(error.message); },
-                false);
+                }
+            
+                XrmServiceToolkit.Rest.Create(entity,
+                    "new_purchase_dealSet",
+                    function (result) {
+                        var reletivePath = "/userdefined/edit.aspx?etc=10021";
+                        reletivePath = reletivePath + "&id=";
+                        var windowName = "_blank";
+                        var serverUrl = Xrm.Page.context.getClientUrl();
+                        if (serverUrl != null && serverUrl != "" && result.new_purchase_dealId.replace("{", "").replace("}", "") != null) {
+                            serverUrl = serverUrl + reletivePath;
+                            serverUrl = serverUrl + result.new_purchase_dealId.replace("{", "").replace("}", "");
+                            window.open(serverUrl);
+                        }
+                    },
+                    function (error) { console.log(error.message); },
+                    false);
+            },    function (error) {
+                console.log("in error handler");
+                console.log(error.message);
+            }, function () { }, false);
         }
         else {
             alert("Ціна постачальника Одеса вища за ціну закупівлі Одеса. Картка угоди не може мути створеною.");
