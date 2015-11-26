@@ -92,8 +92,10 @@ softline.CreateDealMethods = function () {
                 entity.new_shipping_method = { Value: GetFieldValue("new_urchase_method") };
             if (GetFieldValue("new_supplier_volume") != null)
                 entity.new_purchase_amount = GetFieldValue("new_supplier_volume");
-            if (GetFieldValue("new_supplier_price_mykolaiv") != null)
-                entity.new_recommended_price = { Value: GetFieldValue("new_supplier_price_mykolaiv").toString().replace('.', ',') };
+            if (GetFieldValue("new_supplier_price_mykolaiv") != null) {
+                entity.new_recommended_price = { Value: supplierO.toString().replace('.', ',') };
+                entity.new_purchase_opport_price = { Value: supplierO.toString().replace('.', ',') };
+            }
 
             XrmServiceToolkit.Rest.Create(entity,
                 "new_purchase_dealSet",
@@ -146,8 +148,11 @@ softline.CreateDealMethods = function () {
                 entity.new_shipping_method = { Value: GetFieldValue("new_urchase_method") };
             if (GetFieldValue("new_supplier_volume") != null)
                 entity.new_purchase_amount = GetFieldValue("new_supplier_volume");
-            if (GetFieldValue("new_supplier_price_odesa") != null)
-                entity.new_recommended_price = { Value: GetFieldValue("new_supplier_price_odesa").toString().replace('.', ',') };
+            if (GetFieldValue("new_supplier_price_odesa") != null) {
+                entity.new_recommended_price = { Value: supplierO.toString().replace('.', ',') };
+                entity.new_purchase_opport_price = { Value: supplierO.toString().replace('.', ',') };
+            }
+
 
             XrmServiceToolkit.Rest.Create(entity,
                 "new_purchase_dealSet",
