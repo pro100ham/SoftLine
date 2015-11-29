@@ -105,13 +105,17 @@ softline.CreateDealMethods = function () {
                 if (GetFieldValue("new_personal_taskid") != null)
                     entity.new_purchase_task = { Id: GetFieldValue("new_personal_taskid")[0].id, LogicalName: GetFieldValue("new_personal_taskid")[0].typename };
 
-                if (GetFieldValue("new_purchase_period_of") != null)
+                if (GetFieldValue("new_purchase_period_of") != null) {
                     var of = GetFieldValue("new_purchase_period_of");
-                entity.new_purchase_term_from = of.setHours(timeZone);
+                    of.setHours(timeZone);
+                    entity.new_purchase_term_from = of;
+                }
 
-                if (GetFieldValue("new_purchase_period_to") != null)
-                    var to = GetFieldValue("new_purchase_period_to")
-                entity.new_purchase_term_till = to.setHours(timeZone);
+                if (GetFieldValue("new_purchase_period_to") != null) {
+                    var to = GetFieldValue("new_purchase_period_to");
+                    to.setHours(timeZone);
+                    entity.new_purchase_term_till = to;
+                }
 
                 if (data != null && data.length != 0) {
                     for (var i = 0; i < data.length; i++) {
@@ -147,7 +151,7 @@ softline.CreateDealMethods = function () {
     if (GetFieldValue("new_supplier_price_odesa") != null &&
         GetFieldValue("new_purch_price_odesa") != null &&
         GetFieldValue("new_offer_status") == 100000001 &&
-        GetFieldValue("new_supplier_price_mykolaiv") != 0) {
+        GetFieldValue("new_supplier_price_odesa") != 0) {
 
         var supplierO = GetFieldValue("new_supplier_price_odesa");
         var puchaseO = GetFieldValue("new_purch_price_odesa");
@@ -177,21 +181,25 @@ softline.CreateDealMethods = function () {
                     entity.new_purchase_amount = GetFieldValue("new_supplier_volume_odesa");
                 if (supplierO != null)
                     entity.new_purchase_opport_price = { Value: supplierO.toString().replace('.', ',') };
-                if (puchasN != null)
-                    entity.new_purchase_price = { Value: puchasN.toString().replace('.', ',') };
+                if (puchaseO != null)
+                    entity.new_purchase_price = { Value: puchaseO.toString().replace('.', ',') };
                 if (GetFieldValue("new_recom_price_odesa") != null)
                     entity.new_recommended_price = { Value: GetFieldValue("new_recom_price_odesa").toString().replace('.', ',') };
 
                 if (GetFieldValue("new_personal_taskid") != null)
                     entity.new_purchase_task = { Id: GetFieldValue("new_personal_taskid")[0].id, LogicalName: GetFieldValue("new_personal_taskid")[0].typename };
 
-                if (GetFieldValue("new_purchase_period_of") != null)
+                if (GetFieldValue("new_purchase_period_of") != null) {
                     var of = GetFieldValue("new_purchase_period_of");
-                entity.new_purchase_term_from = of.setHours(timeZone);
+                    of.setHours(timeZone);
+                    entity.new_purchase_term_from = of;
+                }
 
-                if (GetFieldValue("new_purchase_period_to") != null)
-                    var to = GetFieldValue("new_purchase_period_to")
-                entity.new_purchase_term_till = to.setHours(timeZone);
+                if (GetFieldValue("new_purchase_period_to") != null) {
+                    var to = GetFieldValue("new_purchase_period_to");
+                    to.setHours(timeZone);
+                    entity.new_purchase_term_till = to;
+                }
 
                 if (data != null && data.length != 0) {
                     for (var i = 0; i < data.length; i++) {
