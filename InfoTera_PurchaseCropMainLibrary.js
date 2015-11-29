@@ -62,9 +62,12 @@ softline.CanculateAuto = function () {
 }
 
 softline.CreateDealMethods = function () {
-    if ((GetFieldValue("new_supplier_price_mykolaiv") != null ||
+    var timeZone = -(new Date().getTimezoneOffset() / 60)
+    if ((GetFieldValue("new_supplier_price_mykolaiv") != null &&
         GetFieldValue("new_purch_price_mykolaiv") != null) &&
-        GetFieldValue("new_offer_status") == 100000001) {
+        GetFieldValue("new_offer_status") == 100000001 &&
+        GetFieldValue("new_supplier_price_mykolaiv") != 0) {
+
         var supplierN = GetFieldValue("new_supplier_price_mykolaiv");
         var puchasN = GetFieldValue("new_purch_price_mykolaiv");
         if (supplierN <= puchasN) {
@@ -91,12 +94,24 @@ softline.CreateDealMethods = function () {
                     entity.new_shipping_method = { Value: GetFieldValue("new_urchase_method") };
                 if (GetFieldValue("new_supplier_volume_mykolaiv") != null)
                     entity.new_purchase_amount = GetFieldValue("new_supplier_volume_mykolaiv");
-                if (supplierN != null) {
-                    entity.new_purchase_price = { Value: supplierN.toString().replace('.', ',') };
+                if (puchasN != null)
+                    entity.new_purchase_price = { Value: puchasN.toString().replace('.', ',') };
+                if (supplierN != null)
                     entity.new_purchase_opport_price = { Value: supplierN.toString().replace('.', ',') };
-                }
+
                 if (GetFieldValue("new_recom_price_mykolaiv") != null)
                     entity.new_recommended_price = { Value: GetFieldValue("new_recom_price_mykolaiv").toString().replace('.', ',') };
+
+                if (GetFieldValue("new_personal_taskid") != null)
+                    entity.new_purchase_task = { Id: GetFieldValue("new_personal_taskid")[0].id, LogicalName: GetFieldValue("new_personal_taskid")[0].typename };
+
+                if (GetFieldValue("new_purchase_period_of") != null)
+                    var of = GetFieldValue("new_purchase_period_of");
+                entity.new_purchase_term_from = of.setHours(timeZone);
+
+                if (GetFieldValue("new_purchase_period_to") != null)
+                    var to = GetFieldValue("new_purchase_period_to")
+                entity.new_purchase_term_till = to.setHours(timeZone);
 
                 if (data != null && data.length != 0) {
                     for (var i = 0; i < data.length; i++) {
@@ -129,9 +144,11 @@ softline.CreateDealMethods = function () {
             alert("Ціна постачальника Миколаїв вища за ціну закупівлі Миколаїв. Картка угоди не може мути створеною.");
         }
     }
-    if ((GetFieldValue("new_supplier_price_odesa") != null ||
-        GetFieldValue("new_purch_price_odesa") != null) &&
-        GetFieldValue("new_offer_status") == 100000001) {
+    if (GetFieldValue("new_supplier_price_odesa") != null &&
+        GetFieldValue("new_purch_price_odesa") != null &&
+        GetFieldValue("new_offer_status") == 100000001 &&
+        GetFieldValue("new_supplier_price_mykolaiv") != 0) {
+
         var supplierO = GetFieldValue("new_supplier_price_odesa");
         var puchaseO = GetFieldValue("new_purch_price_odesa");
         if (supplierO <= puchaseO) {
@@ -158,12 +175,23 @@ softline.CreateDealMethods = function () {
                     entity.new_shipping_method = { Value: GetFieldValue("new_urchase_method") };
                 if (GetFieldValue("new_supplier_volume_odesa") != null)
                     entity.new_purchase_amount = GetFieldValue("new_supplier_volume_odesa");
-                if (supplierO != null) {
-                    entity.new_purchase_price = { Value: supplierO.toString().replace('.', ',') };
+                if (supplierO != null)
                     entity.new_purchase_opport_price = { Value: supplierO.toString().replace('.', ',') };
-                }
+                if (puchasN != null)
+                    entity.new_purchase_price = { Value: puchasN.toString().replace('.', ',') };
                 if (GetFieldValue("new_recom_price_odesa") != null)
                     entity.new_recommended_price = { Value: GetFieldValue("new_recom_price_odesa").toString().replace('.', ',') };
+
+                if (GetFieldValue("new_personal_taskid") != null)
+                    entity.new_purchase_task = { Id: GetFieldValue("new_personal_taskid")[0].id, LogicalName: GetFieldValue("new_personal_taskid")[0].typename };
+
+                if (GetFieldValue("new_purchase_period_of") != null)
+                    var of = GetFieldValue("new_purchase_period_of");
+                entity.new_purchase_term_from = of.setHours(timeZone);
+
+                if (GetFieldValue("new_purchase_period_to") != null)
+                    var to = GetFieldValue("new_purchase_period_to")
+                entity.new_purchase_term_till = to.setHours(timeZone);
 
                 if (data != null && data.length != 0) {
                     for (var i = 0; i < data.length; i++) {
