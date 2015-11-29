@@ -19,22 +19,26 @@ softline.getInfoFromAccount = function () {
         XrmServiceToolkit.Rest.Retrieve(Xrm.Page.getAttribute('to').getValue()[0].id, "AccountSet", "Address2_Line1,new_city_postalid,new_postal_areaID,new_region_postalid,PrimaryContactId,Telephone1",
                             null,
                 function (_listOfFields) {
-                    if (_listOfFields.new_city_postalid) {
+                    if (_listOfFields.new_city_postalid != null &&
+                        _listOfFields.new_city_postalid.Id != null) {
                         SetFieldValue("new_city", [{ id: _listOfFields.new_city_postalid.Id, entityType: _listOfFields.new_city_postalid.LogicalName, name: _listOfFields.new_city_postalid.Name }]);
                     }
-                    if (_listOfFields.new_region_postalid) {
+                    if (_listOfFields.new_region_postalid != null &&
+                        _listOfFields.new_region_postalid.Id != null) {
                         SetFieldValue('new_region', [{ id: _listOfFields.new_region_postalid.Id, entityType: _listOfFields.new_region_postalid.LogicalName, name: _listOfFields.new_region_postalid.Name }]);
                     }
-                    if (_listOfFields.new_postal_areaID) {
+                    if (_listOfFields.new_postal_areaID != null &&
+                        _listOfFields.new_postal_areaID.Id != null) {
                         SetFieldValue('new_area', [{ id: _listOfFields.new_postal_areaID.Id, entityType: _listOfFields.new_postal_areaID.LogicalName, name: _listOfFields.new_postal_areaID.Name }]);
                     }
-                    if (_listOfFields.Address2_Line1) {//text
+                    if (_listOfFields.Address2_Line1 != null) {//text
                         SetFieldValue("new_address_street", _listOfFields.Address2_Line1);
                     }
-                    if (_listOfFields.PrimaryContactId) {
+                    if (_listOfFields.PrimaryContactId != null &&
+                        _listOfFields.PrimaryContactId.Id != null) {
                         SetFieldValue("new_contactid", [{ id: _listOfFields.PrimaryContactId.Id, entityType: _listOfFields.PrimaryContactId.LogicalName, name: _listOfFields.PrimaryContactId.Name }]);
                     }
-                    if (_listOfFields.Telephone1) {
+                    if (_listOfFields.Telephone1 != null) {
                         SetFieldValue("phonenumber", _listOfFields.Telephone1);
                     }
                 },
