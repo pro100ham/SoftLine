@@ -95,12 +95,12 @@ softline.CreateDealMethods = function () {
                 if (GetFieldValue("new_supplier_volume_mykolaiv") != null)
                     entity.new_purchase_amount = GetFieldValue("new_supplier_volume_mykolaiv");
                 if (puchasN != null)
-                    entity.new_purchase_price = { Value: puchasN.toString().replace('.', ',') };
+                    entity.new_purchase_price = { Value: puchasN.toString() };
                 if (supplierN != null)
-                    entity.new_purchase_opport_price = { Value: supplierN.toString().replace('.', ',') };
+                    entity.new_purchase_opport_price = { Value: supplierN.toString() };
 
                 if (GetFieldValue("new_recom_price_mykolaiv") != null)
-                    entity.new_recommended_price = { Value: GetFieldValue("new_recom_price_mykolaiv").toString().replace('.', ',') };
+                    entity.new_recommended_price = { Value: GetFieldValue("new_recom_price_mykolaiv").toString() };
 
                 if (GetFieldValue("new_personal_taskid") != null)
                     entity.new_purchase_task = { Id: GetFieldValue("new_personal_taskid")[0].id, LogicalName: GetFieldValue("new_personal_taskid")[0].typename };
@@ -180,11 +180,11 @@ softline.CreateDealMethods = function () {
                 if (GetFieldValue("new_supplier_volume_odesa") != null)
                     entity.new_purchase_amount = GetFieldValue("new_supplier_volume_odesa");
                 if (supplierO != null)
-                    entity.new_purchase_opport_price = { Value: supplierO.toString().replace('.', ',') };
+                    entity.new_purchase_opport_price = { Value: supplierO.toString() };
                 if (puchaseO != null)
-                    entity.new_purchase_price = { Value: puchaseO.toString().replace('.', ',') };
+                    entity.new_purchase_price = { Value: puchaseO.toString() };
                 if (GetFieldValue("new_recom_price_odesa") != null)
-                    entity.new_recommended_price = { Value: GetFieldValue("new_recom_price_odesa").toString().replace('.', ',') };
+                    entity.new_recommended_price = { Value: GetFieldValue("new_recom_price_odesa").toString() };
 
                 if (GetFieldValue("new_personal_taskid") != null)
                     entity.new_purchase_task = { Id: GetFieldValue("new_personal_taskid")[0].id, LogicalName: GetFieldValue("new_personal_taskid")[0].typename };
