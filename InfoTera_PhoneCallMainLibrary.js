@@ -9,6 +9,7 @@
 if (typeof (softline) == "undefined") { softline = { __namespace: true }; }
 
 softline.onLoad = function () {
+    softline.getInfoFromAccount();
     Xrm.Page.getAttribute("to").addOnChange(softline.getInfoFromAccount);
 }
 
