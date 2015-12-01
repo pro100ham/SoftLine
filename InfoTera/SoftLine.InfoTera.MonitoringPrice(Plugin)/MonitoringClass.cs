@@ -149,7 +149,7 @@ namespace SoftLine.InfoTera.MonitoringPrice
                             service.Create(CreateRecord);
                             new_aprove_price updateToClose = new new_aprove_price();
                             updateToClose.Id = haveAprove.Id;
-                            updateToClose.new_aproved = new OptionSetValue(100000002);
+                            //updateToClose.new_aproved = new OptionSetValue(100000002);
                             service.Update(updateToClose);
                         }
                     }
