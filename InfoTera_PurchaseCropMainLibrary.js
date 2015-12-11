@@ -8,8 +8,13 @@
 
 if (typeof (softline) == "undefined") { softline = { __namespace: true }; }
 
+var shippingMethod = {
+    railroad: 100000001,
+    auto: 100000000
+};
+
+
 softline.onLoad = function () {
-    /*softline.deliveryPayment();*/
     Xrm.Page.getAttribute('new_terminal_odesaid').addOnChange(softline.distanceO);
     Xrm.Page.getAttribute('new_odesaid').addOnChange(softline.distanceO);
     Xrm.Page.getAttribute('new_warehouse').addOnChange(softline.distanceO);
@@ -32,6 +37,16 @@ softline.onLoad = function () {
     Xrm.Page.getAttribute('new_distance_odesa').addOnChange(softline.CanculateAuto);
 
     Xrm.Page.getAttribute('new_offer_status').addOnChange(softline.CreateDealMethods);
+
+    softline.railRoadPricing();
+    Xrm.Page.getAttribute('new_urchase_method').addOnChange(softline.railRoadPricing);
+    Xrm.Page.getAttribute('new_elevator').addOnChange(softline.railRoadPricing);
+
+    softline.setShippingCostIfRailroad();
+    Xrm.Page.getAttribute('new_urchase_method').addOnChange(softline.setShippingCostIfRailroad);
+    Xrm.Page.getAttribute('new_total_elevator_service_1tn_cost').addOnChange(softline.setShippingCostIfRailroad);
+    Xrm.Page.getAttribute('new_rail_shipment_cost_mykolaiv').addOnChange(softline.setShippingCostIfRailroad);
+    Xrm.Page.getAttribute('new_rail_shipment_cost_odesa').addOnChange(softline.setShippingCostIfRailroad);
 }
 
 softline.CanculateAuto = function () {
@@ -512,12 +527,12 @@ softline.distanceO = function () {
 }
 
 softline.deliveryPaymentN = function () {
-    if (Xrm.Page.getAttribute('new_distance_mykolaiv').getValue() != null &&
+    /*if (Xrm.Page.getAttribute('new_distance_mykolaiv').getValue() != null &&
         Xrm.Page.getAttribute('new_distance_odesa').getValue() == null) {
         do {
             softline.distanceO();
         } while (Xrm.Page.getAttribute('new_distance_odesa').getValue() != null);
-    }
+    }*/
 
     if ((Xrm.Page.getAttribute('new_distance_mykolaiv').getValue() != null ||
     Xrm.Page.getAttribute('new_distance_mykolaiv').getValue() != 0) &&
@@ -540,12 +555,12 @@ softline.deliveryPaymentN = function () {
 }
 
 softline.deliveryPaymentO = function () {
-    if (Xrm.Page.getAttribute('new_distance_odesa').getValue() != null &&
+    /*if (Xrm.Page.getAttribute('new_distance_odesa').getValue() != null &&
         Xrm.Page.getAttribute('new_distance_mykolaiv').getValue() == null) {
         do {
             softline.distanceN();
         } while (Xrm.Page.getAttribute('new_distance_odesa').getValue() != null);
-    }
+    }*/
 
     if ((Xrm.Page.getAttribute('new_distance_odesa').getValue() != null &&
     Xrm.Page.getAttribute('new_distance_odesa').getValue() != 0) &&
@@ -652,9 +667,115 @@ softline.yMapLoader = function () {
         Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.init();
     }
     else {
-        Xrm.Page.getAttribute('new_distance').setValue(0)
+        Xrm.Page.getAttribute('new_distance').setValue(0);
     }
 }
+
+softline.railRoadPricing = function () {
+    var notify = function () {
+        Xrm.Page.ui.setFormNotification(
+            'Увага! В даному елеваторі не заповнена загальна вартість послуг! Зайдіть, будь ласка, в картку елеватора та внесіть дані',
+            'ERROR', 'rail_road_pricing');
+    };
+    var denotify = function () {
+        Xrm.Page.ui.clearFormNotification('rail_road_pricing');
+    };
+
+
+
+    var getState = function () {
+        var state = {
+            shippingMethodCode: Xrm.Page.getAttribute('new_urchase_method').getValue(),
+            elevatorId: Xrm.Page.getAttribute('new_elevator').getValue(),
+            new_total_service_sum: null,
+            new_total_AUTO_service_cost: null,
+        };
+
+        if (state.elevatorId) {
+            XrmServiceToolkit.Rest.Retrieve(
+                state.elevatorId[0].id, 'new_elevatorSet', 'new_total_service_sum,new_total_AUTO_service_cost', null,
+                function (data) {
+                    state.new_total_service_sum = data.new_total_service_sum.Value;
+                    state.new_total_AUTO_service_cost = data.new_total_AUTO_service_cost.Value;
+                },
+                function (error) {
+                },
+                false);
+        }
+
+        return state;
+    }
+
+    var render = function (state) {
+        var shouldNotify =
+            state.elevatorId &&
+            (!state.new_total_service_sum ||
+                !state.new_total_AUTO_service_cost);
+
+        var shouldDenotify =
+            !state.elevatorId ||
+                state.elevatorId &&
+                state.new_total_service_sum &&
+                state.new_total_AUTO_service_cost;
+
+        if (shouldNotify) {
+            notify();
+        }
+        if (shouldDenotify) {
+            denotify();
+        }
+
+
+        var shouldRemoveValue =
+            !state.shippingMethodCode ||
+            !state.elevatorId ||
+            !state.new_total_service_sum ||
+            !state.new_total_AUTO_service_cost;
+
+        if (shouldRemoveValue) {
+            SetFieldValue('new_total_elevator_service_1tn_cost', null);
+        }
+
+
+        var shouldSetValue =
+            state.shippingMethodCode &&
+            state.elevatorId &&
+            state.new_total_service_sum &&
+            state.new_total_AUTO_service_cost;
+
+        if (shouldSetValue) {
+
+            var isRailRoad = state.shippingMethodCode === shippingMethod.railroad;
+
+            SetFieldValue(
+                'new_total_elevator_service_1tn_cost',
+
+                isRailRoad ?
+                state.new_total_service_sum :
+                state.new_total_AUTO_service_cost);
+        }
+    };
+
+
+    var fullState = getState();
+
+    render(fullState);
+};
+
+softline.setShippingCostIfRailroad = function () {
+    var isRailRoad = Xrm.Page.getAttribute('new_urchase_method').getValue() === shippingMethod.railroad;
+
+    if (!isRailRoad) {
+        return;
+    }
+
+    var new_elevator_service_cost = Xrm.Page.getAttribute('new_total_elevator_service_1tn_cost').getValue() || 0;
+    var shipCostMyk = Xrm.Page.getAttribute('new_rail_shipment_cost_mykolaiv').getValue() || 0;
+    var shipCostOdessa = Xrm.Page.getAttribute('new_rail_shipment_cost_odesa').getValue() || 0;
+
+    SetFieldValue('new_ship_cost_mykolaiv', new_elevator_service_cost + shipCostMyk);
+    SetFieldValue('new_ship_cost_odesa', new_elevator_service_cost + shipCostOdessa);
+};
 
 function SetFieldValue(FieldName, value) {
     Xrm.Page.getAttribute(FieldName).setSubmitMode("always");

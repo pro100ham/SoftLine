@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;
+using Microsoft.Xrm.Sdk.Query;
 
 /// <summary>
 /// АВТОМАТИЧНЕ СТВОРЕННЯ ЗАПИСУ «ЗАТВЕРДЖЕННЯ ЦІНИ»
@@ -15,18 +16,18 @@ namespace SoftLine.InfoTera.MonitoringPrice
         {
             try
             {
-                IPluginExecutionContext context = (IPluginExecutionContext)serviceProvider.GetService(typeof(IPluginExecutionContext));
-                IOrganizationServiceFactory serviceFactory = (IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory));
+                IPluginExecutionContext context = (IPluginExecutionContext) serviceProvider.GetService(typeof(IPluginExecutionContext));
+                IOrganizationServiceFactory serviceFactory = (IOrganizationServiceFactory) serviceProvider.GetService(typeof(IOrganizationServiceFactory));
                 IOrganizationService service = serviceFactory.CreateOrganizationService(context.UserId);
 
-                if (context.PrimaryEntityName != new_monitoring.EntityLogicalName)
+                if ( context.PrimaryEntityName != new_monitoring.EntityLogicalName )
                     return;
 
-                Entity entity = null; ;
+                Entity entity = null;
                 if ( context.MessageName.ToLower() == "create" )
                 {
                     entity = (Entity) context.InputParameters["Target"];
-                    
+
                 }
                 else if ( context.MessageName.ToLower() == "update" )
                 {
@@ -38,12 +39,15 @@ namespace SoftLine.InfoTera.MonitoringPrice
                 }
 
                 var correnctEntity = entity.ToEntity<new_monitoring>();
+                if ( !isTrust(correnctEntity.new_accountid, service) )
+                    return;
+
                 /* if (DateTime.Now < DateTime.Now.Date.AddHours(11).AddMinutes(05))*/
-                using (var orgContext = new OrganizationServiceContext(service))
+                using ( var orgContext = new OrganizationServiceContext(service) )
                 {
                     var haveAprove = CheckaprovedEntity(orgContext, correnctEntity.new_cropid.Id);
 
-                    if (haveAprove == null)
+                    if ( haveAprove == null )
                     {
 
                         var checkPurchase = (from i in orgContext.CreateQuery<new_aprove_price>()
@@ -61,7 +65,7 @@ namespace SoftLine.InfoTera.MonitoringPrice
                                                  new_trader_Odesaid = i.new_trader_Odesaid
                                              }).FirstOrDefault();
 
-                        if (checkPurchase == null)
+                        if ( checkPurchase == null )
                         {
                             new_aprove_price CreateRecord = new new_aprove_price()
                             {
@@ -80,7 +84,7 @@ namespace SoftLine.InfoTera.MonitoringPrice
                             UpdateRecord.Id = checkPurchase.Id;
                             bool flag = false;
 
-                            if (checkPurchase.new_max_purchase_price_odessa.Value < correnctEntity.new_purchase_price_odessa.Value)
+                            if ( checkPurchase.new_max_purchase_price_odessa?.Value < correnctEntity.new_purchase_price_odessa?.Value )
                             {
                                 UpdateRecord.new_max_purchase_price_odessa = correnctEntity.new_purchase_price_odessa;
                                 UpdateRecord.new_trader_Odesaid = correnctEntity.new_accountid;
@@ -94,7 +98,7 @@ namespace SoftLine.InfoTera.MonitoringPrice
                                 UpdateRecord.new_trader_Odesaid = checkPurchase.new_trader_Odesaid;
                             }
 
-                            if (checkPurchase.new_max_purchase_price_nikolaev.Value < correnctEntity.new_purchase_price_nikolaev.Value)
+                            if ( checkPurchase.new_max_purchase_price_nikolaev?.Value < correnctEntity.new_purchase_price_nikolaev?.Value )
                             {
                                 UpdateRecord.new_max_purchase_price_nikolaev = correnctEntity.new_purchase_price_nikolaev;
                                 UpdateRecord.new_trader_Mykolaivid = correnctEntity.new_accountid;
@@ -107,7 +111,7 @@ namespace SoftLine.InfoTera.MonitoringPrice
                                 UpdateRecord.new_max_purchase_price_nikolaev = checkPurchase.new_max_purchase_price_nikolaev;
                                 UpdateRecord.new_trader_Mykolaivid = checkPurchase.new_trader_Mykolaivid;
                             }
-                            if (flag)
+                            if ( flag )
                             {
                                 service.Update(UpdateRecord);
                             }
@@ -118,7 +122,7 @@ namespace SoftLine.InfoTera.MonitoringPrice
                         new_aprove_price CreateRecord = new new_aprove_price();
                         bool flag = false;
 
-                        if (haveAprove.new_max_purchase_price_odessa.Value < correnctEntity.new_purchase_price_odessa.Value)
+                        if ( haveAprove.new_max_purchase_price_odessa?.Value < correnctEntity.new_purchase_price_odessa?.Value )
                         {
                             CreateRecord.new_max_purchase_price_odessa = correnctEntity.new_purchase_price_odessa;
                             CreateRecord.new_trader_Odesaid = correnctEntity.new_accountid;
@@ -131,7 +135,7 @@ namespace SoftLine.InfoTera.MonitoringPrice
                             CreateRecord.new_max_purchase_price_odessa = haveAprove.new_max_purchase_price_odessa;
                             CreateRecord.new_trader_Odesaid = haveAprove.new_trader_Odesaid;
                         }
-                        if (haveAprove.new_max_purchase_price_nikolaev.Value < correnctEntity.new_purchase_price_nikolaev.Value)
+                        if ( haveAprove.new_max_purchase_price_nikolaev?.Value < correnctEntity.new_purchase_price_nikolaev?.Value )
                         {
                             CreateRecord.new_max_purchase_price_nikolaev = correnctEntity.new_purchase_price_nikolaev;
                             CreateRecord.new_trader_Mykolaivid = correnctEntity.new_accountid;
@@ -144,7 +148,7 @@ namespace SoftLine.InfoTera.MonitoringPrice
                             CreateRecord.new_max_purchase_price_nikolaev = haveAprove.new_max_purchase_price_nikolaev;
                             CreateRecord.new_trader_Mykolaivid = haveAprove.new_trader_Mykolaivid;
                         }
-                        if (flag)
+                        if ( flag )
                         {
                             service.Create(CreateRecord);
                             new_aprove_price updateToClose = new new_aprove_price();
@@ -155,10 +159,20 @@ namespace SoftLine.InfoTera.MonitoringPrice
                     }
                 }
             }
-            catch (Exception ex)
+            catch ( Exception ex )
             {
                 throw new InvalidPluginExecutionException(ex.Message);
             }
+        }
+
+        private bool isTrust(EntityReference new_accountid, IOrganizationService service)
+        {
+            var isTrust = service.Retrieve("account", new_accountid.Id, new ColumnSet("new_trust"));
+
+            if ( isTrust == null || isTrust.GetAttributeValue<bool?>("new_trust") == null)
+                return false;
+
+            return isTrust.GetAttributeValue<bool>("new_trust");
         }
 
         private new_aprove_price CheckaprovedEntity(OrganizationServiceContext orgContext, Guid id)

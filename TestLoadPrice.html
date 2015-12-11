@@ -167,8 +167,8 @@
                     // Id: crmEntity.id,
                     NameAccount: { ID: '0', AccountName: 'Вибрати' },
                     Crop: { CategoryID: '0', CategoryName: 'Вибрати' },
-                    Nikolaev: 0,
-                    Odessa: 0
+                    Nikolaev: null,
+                    Odessa: null
                 }
             };
             this.UpdateEntity = function (targetEntity) {
@@ -259,8 +259,8 @@
                         fields: {
                             NameAccount: { defaultValue: { ID: 0, AccountName: "" } },
                             Crop: { defaultValue: { CategoryID: 0, CategoryName: "" } },
-                            Nikolaev: { type: "number", defaultValue: 0 },
-                            Odessa: { type: "number", defaultValue: 0 }
+                            Nikolaev: { type: "number", defaultValue: "" },
+                            Odessa: { type: "number", defaultValue: "" }
                         }
                     }
                 }
@@ -280,7 +280,7 @@
                     allowUnsort: false
                 },
                 dataBound: GridEvents.OnDataBound,
-                toolbar: ["create"],
+                toolbar: ["create", "cancel"],
                 columns: [
                     {
                         field: "Crop",
@@ -381,6 +381,8 @@
                                                 "</fetch>";
                                 var result = XrmServiceToolkit.Soap.Fetch(fetchXml);
                                 for (var i = 0; i < result.length; i++) {
+                                    if (result[i].attributes["name"].value != null &&
+                                        result[i].attributes["name"].value != "")
                                     a.push({ ID: result[i].attributes["accountid"].value, AccountName: result[i].attributes["name"].value });
                                 }
                                 e.success(a);
