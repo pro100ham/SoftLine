@@ -15,6 +15,9 @@ var shippingMethod = {
 
 
 softline.onLoad = function () {
+    softline.distanceO();
+    softline.distanceN();
+
     Xrm.Page.getAttribute('new_terminal_odesaid').addOnChange(softline.distanceO);
     Xrm.Page.getAttribute('new_odesaid').addOnChange(softline.distanceO);
     Xrm.Page.getAttribute('new_warehouse').addOnChange(softline.distanceO);

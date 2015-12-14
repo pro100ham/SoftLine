@@ -118,8 +118,8 @@
             this.ToXrmEntity = function (gridEntity) {
                 var resultEntity;
                 resultEntity = new XrmServiceToolkit.Soap.BusinessEntity("new_monitoring");
-                resultEntity.attributes["new_purchase_price_nikolaev"] = { type: "Money", value: gridEntity.Nikolaev };
-                resultEntity.attributes["new_purchase_price_odessa"] = { type: "Money", value: gridEntity.Odessa };
+                resultEntity.attributes["new_purchase_price_nikolaev"] = { type: "Money", value: gridEntity.Nikolaev == null ? 0.00 : gridEntity.Nikolaev };
+                resultEntity.attributes["new_purchase_price_odessa"] = { type: "Money", value: gridEntity.Odessa == null ? 0.00 : gridEntity.Odessa };
                 if (gridEntity.Sourse)
                     resultEntity.attributes["new_data_source"] = gridEntity.Sourse;
                 if (gridEntity.AnnotationNikolaev)
