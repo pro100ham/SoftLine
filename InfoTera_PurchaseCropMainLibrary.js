@@ -15,13 +15,14 @@ var shippingMethod = {
 
 
 softline.onLoad = function () {
-    softline.distanceO();
-    softline.distanceN();
+    //softline.distanceO();
+    /*Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.checkDistance();
+    softline.distanceN();*/
 
-    Xrm.Page.getAttribute('new_terminal_odesaid').addOnChange(softline.distanceO);
-    Xrm.Page.getAttribute('new_odesaid').addOnChange(softline.distanceO);
-    Xrm.Page.getAttribute('new_warehouse').addOnChange(softline.distanceO);
-    Xrm.Page.getAttribute('new_elevator').addOnChange(softline.distanceO);
+    //Xrm.Page.getAttribute('new_terminal_odesaid').addOnChange(softline.distanceO);
+    //Xrm.Page.getAttribute('new_odesaid').addOnChange(softline.distanceO);
+    //Xrm.Page.getAttribute('new_warehouse').addOnChange(softline.distanceO);
+    //Xrm.Page.getAttribute('new_elevator').addOnChange(softline.distanceO);
 
     Xrm.Page.getAttribute('new_terminal_mykolaivid').addOnChange(softline.distanceN);
     Xrm.Page.getAttribute('new_mykolaivid').addOnChange(softline.distanceN);
@@ -31,7 +32,7 @@ softline.onLoad = function () {
     Xrm.Page.getAttribute('new_supplierid').addOnChange(softline.getInfoFromAccount);
 
     Xrm.Page.getAttribute('new_distance_mykolaiv').addOnChange(softline.deliveryPaymentN);
-    Xrm.Page.getAttribute('new_distance_odesa').addOnChange(softline.deliveryPaymentO);
+    //Xrm.Page.getAttribute('new_distance_odesa').addOnChange(softline.deliveryPaymentO);
     Xrm.Page.getAttribute('new_purch_volume_mykolaiv').addOnChange(softline.deliveryPaymentN);
     Xrm.Page.getAttribute('new_purch_volume_odesa').addOnChange(softline.deliveryPaymentO);
 
@@ -555,6 +556,7 @@ softline.deliveryPaymentN = function () {
                      }, false
                  );
     }
+    softline.distanceO();
 }
 
 softline.deliveryPaymentO = function () {
