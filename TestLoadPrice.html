@@ -167,8 +167,8 @@
                     // Id: crmEntity.id,
                     NameAccount: { ID: '0', AccountName: 'Вибрати' },
                     Crop: { CategoryID: '0', CategoryName: 'Вибрати' },
-                    Nikolaev: null,
-                    Odessa: null
+                    Nikolaev: 0,
+                    Odessa: 0
                 }
             };
             this.UpdateEntity = function (targetEntity) {
@@ -259,8 +259,8 @@
                         fields: {
                             NameAccount: { defaultValue: { ID: 0, AccountName: "" } },
                             Crop: { defaultValue: { CategoryID: 0, CategoryName: "" } },
-                            Nikolaev: { type: "number", defaultValue: "" },
-                            Odessa: { type: "number", defaultValue: "" }
+                            Nikolaev: { type: "number", defaultValue: 0 },
+                            Odessa: { type: "number", defaultValue: 0 }
                         }
                     }
                 }

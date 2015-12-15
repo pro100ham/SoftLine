@@ -42,6 +42,9 @@ namespace SoftLine.InfoTera.MonitoringPrice
                 if ( !isTrust(correnctEntity.new_accountid, service) )
                     return;
 
+                if ( correnctEntity.new_cropid == null )
+                    return;
+
                 /* if (DateTime.Now < DateTime.Now.Date.AddHours(11).AddMinutes(05))*/
                 using ( var orgContext = new OrganizationServiceContext(service) )
                 {
