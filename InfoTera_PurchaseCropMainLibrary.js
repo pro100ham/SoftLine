@@ -32,7 +32,7 @@ softline.onLoad = function () {
     Xrm.Page.getAttribute('new_supplierid').addOnChange(softline.getInfoFromAccount);
 
     Xrm.Page.getAttribute('new_distance_mykolaiv').addOnChange(softline.deliveryPaymentN);
-    //Xrm.Page.getAttribute('new_distance_odesa').addOnChange(softline.deliveryPaymentO);
+    Xrm.Page.getAttribute('new_distance_odesa').addOnChange(softline.deliveryPaymentO);
     Xrm.Page.getAttribute('new_purch_volume_mykolaiv').addOnChange(softline.deliveryPaymentN);
     Xrm.Page.getAttribute('new_purch_volume_odesa').addOnChange(softline.deliveryPaymentO);
 
@@ -588,21 +588,6 @@ softline.deliveryPaymentO = function () {
             false);
     }
 }
-
-/*softline.prisePurchace = function () {
-    if (Xrm.Page.getAttribute('new_purchase_order').getValue() != null &&
-        Xrm.Page.getAttribute('new_delivery_cost').getValue() != null) {
-        XrmServiceToolkit.Rest.Retrieve(Xrm.Page.getAttribute('new_purchase_order').getValue()[0].id, 'new_purchase_orderSet', 'new_purchase_price', null,
-            function (data) {
-                if (data.new_purchase_price != null) {
-                    SetFieldValue('new_purchase_price', data.new_purchase_price.Value * Xrm.Page.getAttribute('new_delivery_cost').getValue());
-                }
-            },
-             function (error) {
-                 console.log(error.message);
-             }, false);
-    }
-}*/
 
 softline.yMapLoader = function () {
     var checkpoint = [];
