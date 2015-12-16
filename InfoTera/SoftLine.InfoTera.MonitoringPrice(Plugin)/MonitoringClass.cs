@@ -49,10 +49,28 @@ namespace SoftLine.InfoTera.MonitoringPrice
                 using ( var orgContext = new OrganizationServiceContext(service) )
                 {
                     var haveAprove = CheckaprovedEntity(orgContext, correnctEntity.new_cropid.Id);
+                    var currency = getCurrency(orgContext) ?? 0;
+                    var margin = getMargin(orgContext) ?? new Money(0);
+                    double nikolaevUSD = 0;
+                    Money nikolaevRec = new Money(0);
+                    double odesaUSD = 0;
+                    Money odesaRec = new Money(0);
+
+                    if ( correnctEntity.new_purchase_price_nikolaev != null &&
+                        correnctEntity.new_purchase_price_nikolaev != new Money(0))
+                    {
+                        nikolaevUSD = (double) correnctEntity.new_purchase_price_nikolaev?.Value / currency;
+                        nikolaevRec = new Money((decimal) nikolaevUSD - margin.Value);
+                    }
+                    if ( correnctEntity.new_purchase_price_odessa != null &&
+                        correnctEntity.new_purchase_price_odessa != new Money(0) )
+                    {
+                        odesaUSD = (double) correnctEntity.new_purchase_price_odessa?.Value / currency;
+                        odesaRec = new Money((decimal) odesaUSD - margin.Value);
+                    }
 
                     if ( haveAprove == null )
                     {
-
                         var checkPurchase = (from i in orgContext.CreateQuery<new_aprove_price>()
                                              where i.CreatedOn >= DateTime.Now.Date.ToUniversalTime() &&
                                                   i.CreatedOn <= DateTime.Now.AddDays(1).Date.ToUniversalTime() &&
@@ -77,7 +95,16 @@ namespace SoftLine.InfoTera.MonitoringPrice
                                 new_cropid = correnctEntity.new_cropid,
                                 new_aproved = new OptionSetValue(100000001),
                                 new_trader_Odesaid = correnctEntity.new_accountid,
-                                new_trader_Mykolaivid = correnctEntity.new_accountid
+                                new_trader_Mykolaivid = correnctEntity.new_accountid,
+
+                                new_dollar_rate = currency,
+                                new_max_purchase_mykolaiv_usd = nikolaevUSD,
+                                new_max_purchase_odesa_usd = odesaUSD,
+                                new_recom_purchase_price_nikolaev = nikolaevRec,
+                                new_recom_purchase_price_odessa = odesaRec,
+                                new_dollar_purchase_price_nikolaev = (double) nikolaevRec.Value / currency,
+                                new_dollar_purchase_price_odessa = (double) odesaRec.Value / currency,
+                                new_purchase_margin = margin
                             };
                             service.Create(CreateRecord);
                         }
@@ -131,6 +158,14 @@ namespace SoftLine.InfoTera.MonitoringPrice
                             CreateRecord.new_trader_Odesaid = correnctEntity.new_accountid;
                             CreateRecord.new_aproved = new OptionSetValue(100000001);
                             CreateRecord.new_cropid = correnctEntity.new_cropid;
+                            CreateRecord.new_dollar_rate = currency;
+                            CreateRecord.new_max_purchase_mykolaiv_usd = nikolaevUSD;
+                            CreateRecord.new_max_purchase_odesa_usd = odesaUSD;
+                            CreateRecord.new_recom_purchase_price_nikolaev = nikolaevRec;
+                            CreateRecord.new_recom_purchase_price_odessa = odesaRec;
+                            CreateRecord.new_dollar_purchase_price_nikolaev = (double) nikolaevRec.Value / currency;
+                            CreateRecord.new_dollar_purchase_price_odessa = (double) odesaRec.Value / currency;
+                            CreateRecord.new_purchase_margin = margin;
                             flag = true;
                         }
                         else
@@ -144,6 +179,14 @@ namespace SoftLine.InfoTera.MonitoringPrice
                             CreateRecord.new_trader_Mykolaivid = correnctEntity.new_accountid;
                             CreateRecord.new_aproved = new OptionSetValue(100000001);
                             CreateRecord.new_cropid = correnctEntity.new_cropid;
+                            CreateRecord.new_dollar_rate = currency;
+                            CreateRecord.new_max_purchase_mykolaiv_usd = nikolaevUSD;
+                            CreateRecord.new_max_purchase_odesa_usd = odesaUSD;
+                            CreateRecord.new_recom_purchase_price_nikolaev = nikolaevRec;
+                            CreateRecord.new_recom_purchase_price_odessa = odesaRec;
+                            CreateRecord.new_dollar_purchase_price_nikolaev = (double) nikolaevRec.Value / currency;
+                            CreateRecord.new_dollar_purchase_price_odessa = (double) odesaRec.Value / currency;
+                            CreateRecord.new_purchase_margin = margin;
                             flag = true;
                         }
                         else
@@ -168,11 +211,24 @@ namespace SoftLine.InfoTera.MonitoringPrice
             }
         }
 
+        private Money getMargin(OrganizationServiceContext orgContext)
+        {
+            return (from com in orgContext.CreateQuery<new_constant>()
+                    select com.new_purchase_margin).FirstOrDefault();
+        }
+
+        private double? getCurrency(OrganizationServiceContext orgContext)
+        {
+            return (from c in orgContext.CreateQuery<new_currency_rate>()
+                    orderby c.CreatedOn descending
+                    select c.new_USdollar).First();
+        }
+
         private bool isTrust(EntityReference new_accountid, IOrganizationService service)
         {
             var isTrust = service.Retrieve("account", new_accountid.Id, new ColumnSet("new_trust"));
 
-            if ( isTrust == null || isTrust.GetAttributeValue<bool?>("new_trust") == null)
+            if ( isTrust == null || isTrust.GetAttributeValue<bool?>("new_trust") == null )
                 return false;
 
             return isTrust.GetAttributeValue<bool>("new_trust");

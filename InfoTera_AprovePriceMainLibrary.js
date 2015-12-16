@@ -9,10 +9,10 @@
 if (typeof (softline) == "undefined") { softline = { __namespace: true }; }
 
 softline.onLoad = function () {
-    softline.setMarginFromConstanta();
-    softline.setRecommendedPrice();
-    softline.setExchangerate();
-    softline.setRecommendedPriceDoll();
+    //softline.setMarginFromConstanta();
+    //softline.setRecommendedPrice();
+    //softline.setExchangerate();
+    //softline.setRecommendedPriceDoll();
 
     Xrm.Page.getAttribute('new_max_purchase_price_nikolaev').addOnChange(softline.setRecommendedPrice);
     Xrm.Page.getAttribute('new_purchase_margin').addOnChange(softline.setRecommendedPrice);
