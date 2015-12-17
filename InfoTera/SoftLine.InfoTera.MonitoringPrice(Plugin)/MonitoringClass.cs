@@ -55,18 +55,22 @@ namespace SoftLine.InfoTera.MonitoringPrice
                     Money nikolaevRec = new Money(0);
                     double odesaUSD = 0;
                     Money odesaRec = new Money(0);
+                    double odesaRecUSD = 0;
+                    double nikolaevRecUSD = 0;
 
                     if ( correnctEntity.new_purchase_price_nikolaev != null &&
-                        correnctEntity.new_purchase_price_nikolaev != new Money(0))
+                        correnctEntity.new_purchase_price_nikolaev != new Money(0) )
                     {
                         nikolaevUSD = (double) correnctEntity.new_purchase_price_nikolaev?.Value / currency;
-                        nikolaevRec = new Money((decimal) nikolaevUSD - margin.Value);
+                        nikolaevRec = new Money(correnctEntity.new_purchase_price_nikolaev.Value - margin.Value);
+                        nikolaevRecUSD = (double) nikolaevRec.Value / currency;
                     }
                     if ( correnctEntity.new_purchase_price_odessa != null &&
                         correnctEntity.new_purchase_price_odessa != new Money(0) )
                     {
                         odesaUSD = (double) correnctEntity.new_purchase_price_odessa?.Value / currency;
-                        odesaRec = new Money((decimal) odesaUSD - margin.Value);
+                        odesaRec = new Money(correnctEntity.new_purchase_price_odessa.Value - margin.Value);
+                        odesaRecUSD = (double) odesaRec.Value / currency;
                     }
 
                     if ( haveAprove == null )
@@ -98,12 +102,12 @@ namespace SoftLine.InfoTera.MonitoringPrice
                                 new_trader_Mykolaivid = correnctEntity.new_accountid,
 
                                 new_dollar_rate = currency,
-                                new_max_purchase_mykolaiv_usd = nikolaevUSD,
-                                new_max_purchase_odesa_usd = odesaUSD,
+                                new_max_purchase_mykolaiv_usd = nikolaevUSD,                                
+                                new_dollar_purchase_price_nikolaev = nikolaevRecUSD,
                                 new_recom_purchase_price_nikolaev = nikolaevRec,
                                 new_recom_purchase_price_odessa = odesaRec,
-                                new_dollar_purchase_price_nikolaev = (double) nikolaevRec.Value / currency,
-                                new_dollar_purchase_price_odessa = (double) odesaRec.Value / currency,
+                                new_max_purchase_odesa_usd = odesaUSD,
+                                new_dollar_purchase_price_odessa = odesaRecUSD,
                                 new_purchase_margin = margin
                             };
                             service.Create(CreateRecord);
@@ -120,12 +124,22 @@ namespace SoftLine.InfoTera.MonitoringPrice
                                 UpdateRecord.new_trader_Odesaid = correnctEntity.new_accountid;
                                 UpdateRecord.new_aproved = new OptionSetValue(100000001);
                                 UpdateRecord.new_trader_Odesaid = correnctEntity.new_accountid;
+                                UpdateRecord.new_recom_purchase_price_odessa = odesaRec;
+                                UpdateRecord.new_max_purchase_odesa_usd = odesaUSD;
+                                UpdateRecord.new_dollar_purchase_price_odessa = odesaRecUSD;
+                                UpdateRecord.new_purchase_margin = margin;
+                                UpdateRecord.new_dollar_rate = currency;
                                 flag = true;
                             }
                             else
                             {
                                 UpdateRecord.new_max_purchase_price_odessa = checkPurchase.new_max_purchase_price_odessa;
                                 UpdateRecord.new_trader_Odesaid = checkPurchase.new_trader_Odesaid;
+                                UpdateRecord.new_dollar_rate = checkPurchase.new_dollar_rate;
+                                UpdateRecord.new_max_purchase_odesa_usd = checkPurchase.new_max_purchase_mykolaiv_usd;
+                                UpdateRecord.new_dollar_purchase_price_odessa = checkPurchase.new_dollar_purchase_price_nikolaev;
+                                UpdateRecord.new_recom_purchase_price_odessa = checkPurchase.new_recom_purchase_price_nikolaev;
+                                UpdateRecord.new_purchase_margin = checkPurchase.new_purchase_margin;
                             }
 
                             if ( checkPurchase.new_max_purchase_price_nikolaev?.Value < correnctEntity.new_purchase_price_nikolaev?.Value )
@@ -134,12 +148,22 @@ namespace SoftLine.InfoTera.MonitoringPrice
                                 UpdateRecord.new_trader_Mykolaivid = correnctEntity.new_accountid;
                                 UpdateRecord.new_aproved = new OptionSetValue(100000001);
                                 UpdateRecord.new_trader_Mykolaivid = correnctEntity.new_accountid;
+                                UpdateRecord.new_dollar_rate = currency;
+                                UpdateRecord.new_max_purchase_mykolaiv_usd = nikolaevUSD;
+                                UpdateRecord.new_dollar_purchase_price_nikolaev = nikolaevRecUSD;
+                                UpdateRecord.new_recom_purchase_price_nikolaev = nikolaevRec;
+                                UpdateRecord.new_purchase_margin = margin;
                                 flag = true;
                             }
                             else
                             {
                                 UpdateRecord.new_max_purchase_price_nikolaev = checkPurchase.new_max_purchase_price_nikolaev;
                                 UpdateRecord.new_trader_Mykolaivid = checkPurchase.new_trader_Mykolaivid;
+                                UpdateRecord.new_dollar_rate = checkPurchase.new_dollar_rate;
+                                UpdateRecord.new_max_purchase_mykolaiv_usd = checkPurchase.new_max_purchase_mykolaiv_usd;
+                                UpdateRecord.new_dollar_purchase_price_nikolaev = checkPurchase.new_dollar_purchase_price_nikolaev;
+                                UpdateRecord.new_recom_purchase_price_nikolaev = checkPurchase.new_recom_purchase_price_nikolaev;
+                                UpdateRecord.new_purchase_margin = checkPurchase.new_purchase_margin;
                             }
                             if ( flag )
                             {
@@ -159,12 +183,9 @@ namespace SoftLine.InfoTera.MonitoringPrice
                             CreateRecord.new_aproved = new OptionSetValue(100000001);
                             CreateRecord.new_cropid = correnctEntity.new_cropid;
                             CreateRecord.new_dollar_rate = currency;
-                            CreateRecord.new_max_purchase_mykolaiv_usd = nikolaevUSD;
                             CreateRecord.new_max_purchase_odesa_usd = odesaUSD;
-                            CreateRecord.new_recom_purchase_price_nikolaev = nikolaevRec;
                             CreateRecord.new_recom_purchase_price_odessa = odesaRec;
-                            CreateRecord.new_dollar_purchase_price_nikolaev = (double) nikolaevRec.Value / currency;
-                            CreateRecord.new_dollar_purchase_price_odessa = (double) odesaRec.Value / currency;
+                            CreateRecord.new_dollar_purchase_price_odessa = odesaRecUSD;
                             CreateRecord.new_purchase_margin = margin;
                             flag = true;
                         }
@@ -181,11 +202,8 @@ namespace SoftLine.InfoTera.MonitoringPrice
                             CreateRecord.new_cropid = correnctEntity.new_cropid;
                             CreateRecord.new_dollar_rate = currency;
                             CreateRecord.new_max_purchase_mykolaiv_usd = nikolaevUSD;
-                            CreateRecord.new_max_purchase_odesa_usd = odesaUSD;
                             CreateRecord.new_recom_purchase_price_nikolaev = nikolaevRec;
-                            CreateRecord.new_recom_purchase_price_odessa = odesaRec;
-                            CreateRecord.new_dollar_purchase_price_nikolaev = (double) nikolaevRec.Value / currency;
-                            CreateRecord.new_dollar_purchase_price_odessa = (double) odesaRec.Value / currency;
+                            CreateRecord.new_dollar_purchase_price_nikolaev = nikolaevRecUSD;
                             CreateRecord.new_purchase_margin = margin;
                             flag = true;
                         }
