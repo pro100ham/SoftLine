@@ -59,14 +59,14 @@ namespace SoftLine.InfoTera.MonitoringPrice
                     double nikolaevRecUSD = 0;
 
                     if ( correnctEntity.new_purchase_price_nikolaev != null &&
-                        correnctEntity.new_purchase_price_nikolaev != new Money(0) )
+                        correnctEntity.new_purchase_price_nikolaev.Value != 0 )
                     {
                         nikolaevUSD = (double) correnctEntity.new_purchase_price_nikolaev?.Value / currency;
                         nikolaevRec = new Money(correnctEntity.new_purchase_price_nikolaev.Value - margin.Value);
                         nikolaevRecUSD = (double) nikolaevRec.Value / currency;
                     }
                     if ( correnctEntity.new_purchase_price_odessa != null &&
-                        correnctEntity.new_purchase_price_odessa != new Money(0) )
+                        correnctEntity.new_purchase_price_odessa.Value != 0 )
                     {
                         odesaUSD = (double) correnctEntity.new_purchase_price_odessa?.Value / currency;
                         odesaRec = new Money(correnctEntity.new_purchase_price_odessa.Value - margin.Value);
@@ -80,15 +80,7 @@ namespace SoftLine.InfoTera.MonitoringPrice
                                                   i.CreatedOn <= DateTime.Now.AddDays(1).Date.ToUniversalTime() &&
                                                   i.new_cropid.Id == correnctEntity.new_cropid.Id &&
                                                   i.new_aproved != new OptionSetValue(100000002)
-                                             select new new_aprove_price
-                                             {
-                                                 Id = i.Id,
-                                                 new_max_purchase_price_odessa = i.new_max_purchase_price_odessa == null ? new Money(0) : i.new_max_purchase_price_odessa,
-                                                 new_max_purchase_price_nikolaev = i.new_max_purchase_price_nikolaev == null ? new Money(0) : i.new_max_purchase_price_nikolaev,
-                                                 new_cropid = i.new_cropid,
-                                                 new_trader_Mykolaivid = i.new_trader_Mykolaivid,
-                                                 new_trader_Odesaid = i.new_trader_Odesaid
-                                             }).FirstOrDefault();
+                                             select i).FirstOrDefault();
 
                         if ( checkPurchase == null )
                         {
@@ -102,7 +94,7 @@ namespace SoftLine.InfoTera.MonitoringPrice
                                 new_trader_Mykolaivid = correnctEntity.new_accountid,
 
                                 new_dollar_rate = currency,
-                                new_max_purchase_mykolaiv_usd = nikolaevUSD,                                
+                                new_max_purchase_mykolaiv_usd = nikolaevUSD,
                                 new_dollar_purchase_price_nikolaev = nikolaevRecUSD,
                                 new_recom_purchase_price_nikolaev = nikolaevRec,
                                 new_recom_purchase_price_odessa = odesaRec,
@@ -131,7 +123,7 @@ namespace SoftLine.InfoTera.MonitoringPrice
                                 UpdateRecord.new_dollar_rate = currency;
                                 flag = true;
                             }
-                            else
+                           /* else
                             {
                                 UpdateRecord.new_max_purchase_price_odessa = checkPurchase.new_max_purchase_price_odessa;
                                 UpdateRecord.new_trader_Odesaid = checkPurchase.new_trader_Odesaid;
@@ -140,7 +132,7 @@ namespace SoftLine.InfoTera.MonitoringPrice
                                 UpdateRecord.new_dollar_purchase_price_odessa = checkPurchase.new_dollar_purchase_price_nikolaev;
                                 UpdateRecord.new_recom_purchase_price_odessa = checkPurchase.new_recom_purchase_price_nikolaev;
                                 UpdateRecord.new_purchase_margin = checkPurchase.new_purchase_margin;
-                            }
+                            }*/
 
                             if ( checkPurchase.new_max_purchase_price_nikolaev?.Value < correnctEntity.new_purchase_price_nikolaev?.Value )
                             {
@@ -155,7 +147,7 @@ namespace SoftLine.InfoTera.MonitoringPrice
                                 UpdateRecord.new_purchase_margin = margin;
                                 flag = true;
                             }
-                            else
+                           /* else
                             {
                                 UpdateRecord.new_max_purchase_price_nikolaev = checkPurchase.new_max_purchase_price_nikolaev;
                                 UpdateRecord.new_trader_Mykolaivid = checkPurchase.new_trader_Mykolaivid;
@@ -164,7 +156,7 @@ namespace SoftLine.InfoTera.MonitoringPrice
                                 UpdateRecord.new_dollar_purchase_price_nikolaev = checkPurchase.new_dollar_purchase_price_nikolaev;
                                 UpdateRecord.new_recom_purchase_price_nikolaev = checkPurchase.new_recom_purchase_price_nikolaev;
                                 UpdateRecord.new_purchase_margin = checkPurchase.new_purchase_margin;
-                            }
+                            }*/
                             if ( flag )
                             {
                                 service.Update(UpdateRecord);
@@ -259,15 +251,7 @@ namespace SoftLine.InfoTera.MonitoringPrice
                                            i.CreatedOn <= DateTime.Now.AddDays(1).Date.ToUniversalTime() &&
                                            i.new_cropid.Id == id &&
                                            i.new_aproved == new OptionSetValue(100000000)
-                                      select new new_aprove_price
-                                      {
-                                          Id = i.Id,
-                                          new_max_purchase_price_odessa = i.new_max_purchase_price_odessa == null ? new Money(0) : i.new_max_purchase_price_odessa,
-                                          new_max_purchase_price_nikolaev = i.new_max_purchase_price_nikolaev == null ? new Money(0) : i.new_max_purchase_price_nikolaev,
-                                          new_cropid = i.new_cropid,
-                                          new_trader_Mykolaivid = i.new_trader_Mykolaivid,
-                                          new_trader_Odesaid = i.new_trader_Odesaid
-                                      }).FirstOrDefault();
+                                      select i).FirstOrDefault();
             return findAprovePurchase;
         }
     }

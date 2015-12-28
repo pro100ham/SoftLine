@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AZ", "AZ", "{4AF4DE6B-C05D-4213-8080-6C5BF57EBA74}"
 EndProject
@@ -186,13 +186,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OpportunityForm", "Opportun
 EndProject
 Project("{F14B399A-7131-4C87-9E4B-1186C45EF12D}") = "InfoTera.Reports", "InfoTera\InfoTera.Reports\InfoTera.Reports.rptproj", "{4B76A449-3CF9-4F7D-B208-D4352FB2F8A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoftLine.InfoTera.Numerator", "SoftLine.InfoTera.Numerator\SoftLine.InfoTera.Numerator.csproj", "{71B36594-7375-4596-A069-562B420FAD78}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoftLine.Infotera.FromOrderToPlaning", "InfoTera\SoftLine.Infotera.FromOrderToPlaning\SoftLine.Infotera.FromOrderToPlaning.csproj", "{2116099E-9D27-4372-BFE8-6226A30BF77E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoftLine.Infotera.ChangeRecomendedPrice", "InfoTera\SoftLine.Infotera.ChangeRecomendedPrice\SoftLine.Infotera.ChangeRecomendedPrice.csproj", "{28BF5B50-C4A7-4B79-B4A5-51499DF62130}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoftLine.InfoTera.CreateDealFromCrop", "InfoTera\SoftLine.InfoTera.CreateDealFromCrop\SoftLine.InfoTera.CreateDealFromCrop.csproj", "{795B6937-C464-4D7D-9F14-8D78890D30A2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoftLine.InfoTera.Numerator", "InfoTera\SoftLine.InfoTera.Numerator\SoftLine.InfoTera.Numerator.csproj", "{71B36594-7375-4596-A069-562B420FAD78}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -659,24 +659,6 @@ Global
 		{4B76A449-3CF9-4F7D-B208-D4352FB2F8A4}.Release|x86.ActiveCfg = Release
 		{4B76A449-3CF9-4F7D-B208-D4352FB2F8A4}.Release|x86.Build.0 = Release
 		{4B76A449-3CF9-4F7D-B208-D4352FB2F8A4}.Release|x86.Deploy.0 = Release
-		{71B36594-7375-4596-A069-562B420FAD78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{71B36594-7375-4596-A069-562B420FAD78}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{71B36594-7375-4596-A069-562B420FAD78}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{71B36594-7375-4596-A069-562B420FAD78}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{71B36594-7375-4596-A069-562B420FAD78}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{71B36594-7375-4596-A069-562B420FAD78}.Debug|x86.Build.0 = Debug|Any CPU
-		{71B36594-7375-4596-A069-562B420FAD78}.DebugLocal|Any CPU.ActiveCfg = Debug|Any CPU
-		{71B36594-7375-4596-A069-562B420FAD78}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
-		{71B36594-7375-4596-A069-562B420FAD78}.DebugLocal|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{71B36594-7375-4596-A069-562B420FAD78}.DebugLocal|Mixed Platforms.Build.0 = Debug|Any CPU
-		{71B36594-7375-4596-A069-562B420FAD78}.DebugLocal|x86.ActiveCfg = Debug|Any CPU
-		{71B36594-7375-4596-A069-562B420FAD78}.DebugLocal|x86.Build.0 = Debug|Any CPU
-		{71B36594-7375-4596-A069-562B420FAD78}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{71B36594-7375-4596-A069-562B420FAD78}.Release|Any CPU.Build.0 = Release|Any CPU
-		{71B36594-7375-4596-A069-562B420FAD78}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{71B36594-7375-4596-A069-562B420FAD78}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{71B36594-7375-4596-A069-562B420FAD78}.Release|x86.ActiveCfg = Release|Any CPU
-		{71B36594-7375-4596-A069-562B420FAD78}.Release|x86.Build.0 = Release|Any CPU
 		{2116099E-9D27-4372-BFE8-6226A30BF77E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2116099E-9D27-4372-BFE8-6226A30BF77E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2116099E-9D27-4372-BFE8-6226A30BF77E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -731,6 +713,24 @@ Global
 		{795B6937-C464-4D7D-9F14-8D78890D30A2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{795B6937-C464-4D7D-9F14-8D78890D30A2}.Release|x86.ActiveCfg = Release|Any CPU
 		{795B6937-C464-4D7D-9F14-8D78890D30A2}.Release|x86.Build.0 = Release|Any CPU
+		{71B36594-7375-4596-A069-562B420FAD78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71B36594-7375-4596-A069-562B420FAD78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71B36594-7375-4596-A069-562B420FAD78}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{71B36594-7375-4596-A069-562B420FAD78}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{71B36594-7375-4596-A069-562B420FAD78}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{71B36594-7375-4596-A069-562B420FAD78}.Debug|x86.Build.0 = Debug|Any CPU
+		{71B36594-7375-4596-A069-562B420FAD78}.DebugLocal|Any CPU.ActiveCfg = Debug|Any CPU
+		{71B36594-7375-4596-A069-562B420FAD78}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
+		{71B36594-7375-4596-A069-562B420FAD78}.DebugLocal|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{71B36594-7375-4596-A069-562B420FAD78}.DebugLocal|Mixed Platforms.Build.0 = Debug|Any CPU
+		{71B36594-7375-4596-A069-562B420FAD78}.DebugLocal|x86.ActiveCfg = Debug|Any CPU
+		{71B36594-7375-4596-A069-562B420FAD78}.DebugLocal|x86.Build.0 = Debug|Any CPU
+		{71B36594-7375-4596-A069-562B420FAD78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71B36594-7375-4596-A069-562B420FAD78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71B36594-7375-4596-A069-562B420FAD78}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{71B36594-7375-4596-A069-562B420FAD78}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{71B36594-7375-4596-A069-562B420FAD78}.Release|x86.ActiveCfg = Release|Any CPU
+		{71B36594-7375-4596-A069-562B420FAD78}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -773,9 +773,9 @@ Global
 		{679B9320-5C48-45BA-A0D9-0975D862397E} = {D0FD6BF1-6086-4A1C-9362-B6E4A55A32B0}
 		{252D4CEA-6C41-4753-AC8A-05EDABF14D81} = {B63CE19D-423C-4B64-8CBC-7364D9085B80}
 		{4B76A449-3CF9-4F7D-B208-D4352FB2F8A4} = {D0FD6BF1-6086-4A1C-9362-B6E4A55A32B0}
-		{71B36594-7375-4596-A069-562B420FAD78} = {D0FD6BF1-6086-4A1C-9362-B6E4A55A32B0}
 		{2116099E-9D27-4372-BFE8-6226A30BF77E} = {D0FD6BF1-6086-4A1C-9362-B6E4A55A32B0}
 		{28BF5B50-C4A7-4B79-B4A5-51499DF62130} = {D0FD6BF1-6086-4A1C-9362-B6E4A55A32B0}
 		{795B6937-C464-4D7D-9F14-8D78890D30A2} = {D0FD6BF1-6086-4A1C-9362-B6E4A55A32B0}
+		{71B36594-7375-4596-A069-562B420FAD78} = {D0FD6BF1-6086-4A1C-9362-B6E4A55A32B0}
 	EndGlobalSection
 EndGlobal

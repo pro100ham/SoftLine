@@ -39,26 +39,16 @@ namespace SoftLine.InfoTera.Numerator
                             switch (entity.LogicalName)
                             {
                                 case new_purchase_order.EntityLogicalName:
-                                    //new_purchase_order update = new new_purchase_order();
                                     number = getCounterValue.new_purchase_order;
-                                    //update.new_name = $"{number}/{correntYear}";
                                     counter.new_purchase_order = ++number;
-                                    //update.LogicalName = entity.LogicalName;
-                                    //update.Id = entity.Id;
-                                    //service.Update(update);
                                     if (entity.Attributes.Contains("new_name") == true)
                                         entity["new_name"] = $"{number}/{correntYear}";
                                     else
                                         entity.Attributes.Add("new_name", $"{number}/{correntYear}");
                                     break;
                                 case new_purchase_order_change.EntityLogicalName:
-                                    //new_purchase_order_change update1 = new new_purchase_order_change();
                                     number = getCounterValue.new_purchase_order_change;
-                                    //update1.new_name = $"{number}/{correntYear}";
-                                    counter.new_purchase_order_change = ++number;
-                                    //update1.LogicalName = entity.LogicalName;
-                                    //update1.Id = entity.Id;
-                                    //service.Update(update1);
+                                    counter.new_purchase_order_change = ++number;;
                                     if (entity.Attributes.Contains("new_name") == true)
                                         entity["new_name"] = $"{number}/{correntYear}";
                                     else

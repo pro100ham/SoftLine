@@ -15,27 +15,24 @@ var shippingMethod = {
 
 
 softline.onLoad = function () {
-    //softline.distanceO();
-    /*Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.checkDistance();
-    softline.distanceN();*/
-
     //Xrm.Page.getAttribute('new_terminal_odesaid').addOnChange(softline.distanceO);
     //Xrm.Page.getAttribute('new_odesaid').addOnChange(softline.distanceO);
     //Xrm.Page.getAttribute('new_warehouse').addOnChange(softline.distanceO);
     //Xrm.Page.getAttribute('new_elevator').addOnChange(softline.distanceO);
 
-    Xrm.Page.getAttribute('new_terminal_mykolaivid').addOnChange(softline.distanceN);
+    /*Xrm.Page.getAttribute('new_terminal_mykolaivid').addOnChange(softline.distanceN);
     Xrm.Page.getAttribute('new_mykolaivid').addOnChange(softline.distanceN);
     Xrm.Page.getAttribute('new_warehouse').addOnChange(softline.distanceN);
-    Xrm.Page.getAttribute('new_elevator').addOnChange(softline.distanceN);
-
-    Xrm.Page.getAttribute('new_supplierid').addOnChange(softline.getInfoFromAccount);
+    Xrm.Page.getAttribute('new_elevator').addOnChange(softline.distanceN);   
 
     Xrm.Page.getAttribute('new_distance_mykolaiv').addOnChange(softline.deliveryPaymentN);
     Xrm.Page.getAttribute('new_distance_odesa').addOnChange(softline.deliveryPaymentO);
     Xrm.Page.getAttribute('new_purch_volume_mykolaiv').addOnChange(softline.deliveryPaymentN);
-    Xrm.Page.getAttribute('new_purch_volume_odesa').addOnChange(softline.deliveryPaymentO);
+    Xrm.Page.getAttribute('new_purch_volume_odesa').addOnChange(softline.deliveryPaymentO);*/
 
+
+
+    Xrm.Page.getAttribute('new_supplierid').addOnChange(softline.getInfoFromAccount);
     Xrm.Page.getAttribute('new_urchase_method').addOnChange(softline.CanculateAuto);
     Xrm.Page.getAttribute('new_distance_mykolaiv').addOnChange(softline.CanculateAuto);
     Xrm.Page.getAttribute('new_distance_odesa').addOnChange(softline.CanculateAuto);
@@ -52,6 +49,9 @@ softline.onLoad = function () {
     Xrm.Page.getAttribute('new_rail_shipment_cost_mykolaiv').addOnChange(softline.setShippingCostIfRailroad);
     Xrm.Page.getAttribute('new_rail_shipment_cost_odesa').addOnChange(softline.setShippingCostIfRailroad);
 }
+
+
+
 
 softline.CanculateAuto = function () {
     if (GetFieldValue("new_urchase_method") == 100000000) {
@@ -294,7 +294,7 @@ softline.getInfoFromAccount = function () {
         SetFieldValue("new_city", null);
     }
 }
-
+/*
 softline.distanceN = function () {
     //Відстань Миколаїв          new_distance_mykolaiv
     //Термінал Миколаїв          new_terminal_mykolaivid
@@ -394,24 +394,29 @@ softline.distanceN = function () {
         }
     }
 
-    Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.field = 'new_distance_mykolaiv';
+
 
     if (terminalElevator.length == 2) {
+        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.field = 'new_distance_mykolaiv';
         Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.pointToDistance = terminalElevator;
         Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.checkDistance();
     }
     if (terminalSklad.length == 2) {
+        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.field = 'new_distance_mykolaiv';
         Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.pointToDistance = terminalSklad;
         Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.checkDistance();
     }
     if (portElevator.length == 2) {
+        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.field = 'new_elevator_nik';
         Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.pointToDistance = portElevator;
         Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.checkDistance();
-
+        pausecomp(100);
     }
     if (portSklad.length == 2) {
+        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.field = 'new_warehouse_nik';        
         Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.pointToDistance = portSklad;
         Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.checkDistance();
+        pausecomp(100);
     }
 }
 
@@ -531,13 +536,6 @@ softline.distanceO = function () {
 }
 
 softline.deliveryPaymentN = function () {
-    /*if (Xrm.Page.getAttribute('new_distance_mykolaiv').getValue() != null &&
-        Xrm.Page.getAttribute('new_distance_odesa').getValue() == null) {
-        do {
-            softline.distanceO();
-        } while (Xrm.Page.getAttribute('new_distance_odesa').getValue() != null);
-    }*/
-
     if ((Xrm.Page.getAttribute('new_distance_mykolaiv').getValue() != null ||
     Xrm.Page.getAttribute('new_distance_mykolaiv').getValue() != 0) &&
         (Xrm.Page.getAttribute('new_purch_volume_mykolaiv').getValue() != null &&
@@ -560,13 +558,6 @@ softline.deliveryPaymentN = function () {
 }
 
 softline.deliveryPaymentO = function () {
-    /*if (Xrm.Page.getAttribute('new_distance_odesa').getValue() != null &&
-        Xrm.Page.getAttribute('new_distance_mykolaiv').getValue() == null) {
-        do {
-            softline.distanceN();
-        } while (Xrm.Page.getAttribute('new_distance_odesa').getValue() != null);
-    }*/
-
     if ((Xrm.Page.getAttribute('new_distance_odesa').getValue() != null &&
     Xrm.Page.getAttribute('new_distance_odesa').getValue() != 0) &&
         (Xrm.Page.getAttribute('new_purch_volume_odesa').getValue() != null &&
@@ -588,6 +579,7 @@ softline.deliveryPaymentO = function () {
             false);
     }
 }
+*/
 
 softline.yMapLoader = function () {
     var checkpoint = [];
@@ -774,4 +766,11 @@ function SetFieldValue(FieldName, value) {
 
 function GetFieldValue(FieldName) {
     return Xrm.Page.getAttribute(FieldName) != null ? Xrm.Page.getAttribute(FieldName).getValue() : null;
+}
+
+function pausecomp(millis) {
+    var date = new Date();
+    var curDate = null;
+    do { curDate = new Date(); }
+    while (curDate - date < millis);
 }
