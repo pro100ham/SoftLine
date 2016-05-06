@@ -56,7 +56,13 @@ softline.onLoad = function () {
     Xrm.Page.getAttribute('new_rail_shipment_cost_odesa').addOnChange(softline.purchasePriceOdesa);
 
     Xrm.Page.getAttribute('new_personal_taskid').addOnChange(softline.getPersonalTaskInfo);
-
+    softline.getTotalsPurchase();
+    Xrm.Page.getAttribute('new_period_ship_from').addOnChange(softline.CreateDealMethods);
+    Xrm.Page.getAttribute('new_period_ship_to').addOnChange(softline.CreateDealMethods);
+    Xrm.Page.getAttribute('new_purchase_period_to').addOnChange(softline.CreateDealMethods);
+    Xrm.Page.getAttribute('new_purchase_period_of').addOnChange(softline.CreateDealMethods);
+    Xrm.Page.getAttribute('new_supplier_volume_odesa').addOnChange(softline.CreateDealMethods);
+    Xrm.Page.getAttribute('new_supplier_volume_mykolaiv').addOnChange(softline.CreateDealMethods);
 }
 
 softline.CanculateAuto = function () {
@@ -88,24 +94,56 @@ softline.CanculateAuto = function () {
 
 softline.CreateDealMethods = function () {
     var timeZone = -(new Date().getTimezoneOffset() / 60);
-
     var ship_from = GetFieldValue('new_period_ship_from');
     var ship_to = GetFieldValue('new_period_ship_to');
     var purchase_of = GetFieldValue('new_purchase_period_of');
     var purchase_to = GetFieldValue('new_purchase_period_to');
+    var supplierM = GetFieldValue('new_supplier_volume_mykolaiv');
+    var supplierO = GetFieldValue('new_supplier_volume_odesa');
+    var restM = GetFieldValue('new_rest_to_purchase_mykolaiv_total');
+    var restO = GetFieldValue('new_rest_to_purchase_odesa_total');
+
+    var flag = false;
+
+    if (!(ship_to <= purchase_to)) {
+        Xrm.Page.getControl("new_period_ship_to").setNotification("Картка угоди закупівлі не може бути створена! Дата відвантаження ДО пізніша ніж Дата закупівлі ДО!.");
+        SetFieldValue("new_offer_status", 100000000);
+        flag = true;
+    } else {
+        Xrm.Page.getControl("new_period_ship_to").clearNotification();
+    }
+    if (!(ship_to >= purchase_of)) {
+        Xrm.Page.getControl("new_period_ship_from").setNotification("Картка угоди закупівлі не може бути створена! Дата відвантаження ДО раніша ніж Дата закупівлі ВІД!.");
+        SetFieldValue("new_offer_status", 100000000);
+        flag = true;
+    } else {
+        Xrm.Page.getControl("new_period_ship_from").clearNotification();
+    }
+
+    if (supplierM > restM) {
+        Xrm.Page.getControl("new_supplier_volume_mykolaiv").setNotification("Картка угоди закупівлі не може бути створена! Обсяг закупівлі за напрямком Миколаїв перевищено!.");
+        SetFieldValue("new_offer_status", 100000000);
+        flag = true;
+    }
+    else {
+        Xrm.Page.getControl("new_supplier_volume_mykolaiv").clearNotification();
+    }
+    if (supplierO > restO) {
+        Xrm.Page.getControl("new_supplier_volume_odesa").setNotification("Картка угоди закупівлі не може бути створена! Обсяг закупівлі за напрямком Одеса перевищено!.");
+        SetFieldValue("new_offer_status", 100000000);
+        flag = true;
+    }
+    else {
+        Xrm.Page.getControl("new_supplier_volume_odesa").clearNotification();
+    }
+    if (flag) {
+        return;
+    }
 
     if ((GetFieldValue("new_supplier_price_mykolaiv") != null &&
         GetFieldValue("new_purch_price_mykolaiv") != null) &&
         GetFieldValue("new_offer_status") == 100000001 &&
         GetFieldValue("new_supplier_price_mykolaiv") != 0) {
-
-        if (!(ship_to <= purchase_to) ||
-      !(ship_to >= purchase_of)) {
-            Xrm.Page.getControl("new_purchase_period_of").setNotification("Картка угоди закупівлі не може бути створена! Дата відвантаження ДО раніша ніж Дата закупівлі ВІД!.");
-            Xrm.Page.getControl("new_purchase_period_to").setNotification("Картка угоди закупівлі не може бути створена! Дата відвантаження ДО пізніша ніж Дата закупівлі ДО!.");
-            SetFieldValue("new_offer_status", 100000000);
-            return;
-        }
 
         var supplierN = GetFieldValue("new_supplier_price_mykolaiv");
         var puchasN = GetFieldValue("new_purch_price_mykolaiv");
@@ -199,14 +237,6 @@ softline.CreateDealMethods = function () {
         GetFieldValue("new_purch_price_odesa") != null &&
         GetFieldValue("new_offer_status") == 100000001 &&
         GetFieldValue("new_supplier_price_odesa") != 0) {
-
-        if (!(ship_to <= purchase_to) ||
-            !(ship_to >= purchase_of)) {
-            Xrm.Page.getControl("new_purchase_period_of").setNotification("Картка угоди закупівлі не може бути створена! Дата відвантаження ДО раніша ніж Дата закупівлі ВІД!.");
-            Xrm.Page.getControl("new_purchase_period_to").setNotification("Картка угоди закупівлі не може бути створена! Дата відвантаження ДО пізніша ніж Дата закупівлі ДО!.");
-            SetFieldValue("new_offer_status", 100000000);
-            return;
-        }
 
         var supplierO = GetFieldValue("new_supplier_price_odesa");
         var puchaseO = GetFieldValue("new_purch_price_odesa");
@@ -356,7 +386,56 @@ softline.getPersonalTaskInfo = function () {
     }
 }
 
-
+softline.getTotalsPurchase = function () {
+    var portM = GetFieldValue('new_mykolaivid');
+    var portO = GetFieldValue('new_odesaid');
+    var crop = GetFieldValue('new_crop');
+    if (portM != null &&
+        portO != null &&
+        crop != null) {
+        var fetchXml = "<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false' aggregate='true' >" +
+            "    <entity name='new_purchase_order' >" +
+            "        <attribute name='new_status_perform' aggregate='SUM' alias='total' />" +
+            "        <attribute name='new_portid' alias='portid' groupby='true' />" +
+            "        <filter type='and' >" +
+            "            <condition attribute='new_portid' operator='in' >" +
+            "                <value uitype='new_port' >" +
+            "                    " + portM[0].id + "" +
+            "                </value>" +
+            "                <value uitype='new_port' >" +
+            "                    " + portO[0].id + "" +
+            "                </value>" +
+            "            </condition>" +
+            "            <condition attribute='new_cropid' operator='eq' value='" + crop[0].id + "' />" +
+            "            <condition attribute='new_status' operator='in' >" +
+            "                <value>" +
+            "                    100000000" +
+            "                </value>" +
+            "                <value>" +
+            "                    100000005" +
+            "                </value>" +
+            "                <value>" +
+            "                    100000003" +
+            "                </value>" +
+            "                <value>" +
+            "                    100000001" +
+            "                </value>" +
+            "            </condition>" +
+            "        </filter>" +
+            "    </entity>" +
+            "</fetch>";
+        XrmServiceToolkit.Soap.Fetch(fetchXml, true, function (data) {
+            data.forEach(function (item, index) {
+                if (item.attributes.portid_new_portidname.value.startsWith("Миколаїв")) {
+                    SetFieldValue('new_rest_to_purchase_mykolaiv_total', item.attributes.total.value);
+                }
+                if (item.attributes.portid_new_portidname.value.startsWith("Одеса")) {
+                    SetFieldValue('new_rest_to_purchase_odesa_total', item.attributes.total.value);
+                }
+            });
+        });
+    }
+}
 
 
 
@@ -668,18 +747,6 @@ softline.purchasePriceOdesa = function () {
       new_recom_price_odesa - new_ship_cost_odesa);
     Xrm.Page.getAttribute('new_purch_price_odesa').fireOnChange();
 };
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
