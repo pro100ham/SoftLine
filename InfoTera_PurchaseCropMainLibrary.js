@@ -15,24 +15,18 @@ var shippingMethod = {
 
 
 softline.onLoad = function () {
-    //Xrm.Page.getAttribute('new_terminal_odesaid').addOnChange(softline.distanceO);
-    //Xrm.Page.getAttribute('new_odesaid').addOnChange(softline.distanceO);
-    //Xrm.Page.getAttribute('new_warehouse').addOnChange(softline.distanceO);
-    //Xrm.Page.getAttribute('new_elevator').addOnChange(softline.distanceO);
-
-    /*Xrm.Page.getAttribute('new_terminal_mykolaivid').addOnChange(softline.distanceN);
-    Xrm.Page.getAttribute('new_mykolaivid').addOnChange(softline.distanceN);
-    Xrm.Page.getAttribute('new_warehouse').addOnChange(softline.distanceN);
-    Xrm.Page.getAttribute('new_elevator').addOnChange(softline.distanceN);   
-
-    Xrm.Page.getAttribute('new_distance_mykolaiv').addOnChange(softline.deliveryPaymentN);
-    Xrm.Page.getAttribute('new_distance_odesa').addOnChange(softline.deliveryPaymentO);
-    Xrm.Page.getAttribute('new_purch_volume_mykolaiv').addOnChange(softline.deliveryPaymentN);
-    Xrm.Page.getAttribute('new_purch_volume_odesa').addOnChange(softline.deliveryPaymentO);*/
-
-
+    Xrm.Page.getAttribute('new_terminal_odesaid').addOnChange(softline.distance);
+    Xrm.Page.getAttribute('new_terminal_mykolaivid').addOnChange(softline.distance);
+    Xrm.Page.getAttribute('new_warehouse').addOnChange(softline.distance);
+    Xrm.Page.getAttribute('new_elevator').addOnChange(softline.distance);
 
     Xrm.Page.getAttribute('new_supplierid').addOnChange(softline.getInfoFromAccount);
+
+    Xrm.Page.getAttribute('new_distance_mykolaiv').addOnChange(softline.deliveryPaymentN);
+    Xrm.Page.getAttribute('new_rail_shipment_cost_mykolaiv').addOnChange(softline.deliveryPaymentN);
+    Xrm.Page.getAttribute('new_distance_odesa').addOnChange(softline.deliveryPaymentO);
+    Xrm.Page.getAttribute('new_rail_shipment_cost_odesa').addOnChange(softline.deliveryPaymentO);
+
     Xrm.Page.getAttribute('new_urchase_method').addOnChange(softline.CanculateAuto);
     Xrm.Page.getAttribute('new_distance_mykolaiv').addOnChange(softline.CanculateAuto);
     Xrm.Page.getAttribute('new_distance_odesa').addOnChange(softline.CanculateAuto);
@@ -48,10 +42,22 @@ softline.onLoad = function () {
     Xrm.Page.getAttribute('new_total_elevator_service_1tn_cost').addOnChange(softline.setShippingCostIfRailroad);
     Xrm.Page.getAttribute('new_rail_shipment_cost_mykolaiv').addOnChange(softline.setShippingCostIfRailroad);
     Xrm.Page.getAttribute('new_rail_shipment_cost_odesa').addOnChange(softline.setShippingCostIfRailroad);
+
+    softline.purchasePriceMykolaiv();
+    softline.purchasePriceOdesa();
+    Xrm.Page.getAttribute('new_recom_price_mykolaiv').addOnChange(softline.purchasePriceMykolaiv);
+    Xrm.Page.getAttribute('new_ship_cost_mykolaiv').addOnChange(softline.purchasePriceMykolaiv);
+    Xrm.Page.getAttribute('new_total_elevator_service_1tn_cost').addOnChange(softline.purchasePriceMykolaiv);
+    Xrm.Page.getAttribute('new_rail_shipment_cost_mykolaiv').addOnChange(softline.purchasePriceMykolaiv);
+
+    Xrm.Page.getAttribute('new_recom_price_odesa').addOnChange(softline.purchasePriceOdesa);
+    Xrm.Page.getAttribute('new_ship_cost_odesa').addOnChange(softline.purchasePriceOdesa);
+    Xrm.Page.getAttribute('new_total_elevator_service_1tn_cost').addOnChange(softline.purchasePriceOdesa);
+    Xrm.Page.getAttribute('new_rail_shipment_cost_odesa').addOnChange(softline.purchasePriceOdesa);
+
+    Xrm.Page.getAttribute('new_personal_taskid').addOnChange(softline.getPersonalTaskInfo);
+
 }
-
-
-
 
 softline.CanculateAuto = function () {
     if (GetFieldValue("new_urchase_method") == 100000000) {
@@ -81,11 +87,25 @@ softline.CanculateAuto = function () {
 }
 
 softline.CreateDealMethods = function () {
-    var timeZone = -(new Date().getTimezoneOffset() / 60)
+    var timeZone = -(new Date().getTimezoneOffset() / 60);
+
+    var ship_from = GetFieldValue('new_period_ship_from');
+    var ship_to = GetFieldValue('new_period_ship_to');
+    var purchase_of = GetFieldValue('new_purchase_period_of');
+    var purchase_to = GetFieldValue('new_purchase_period_to');
+
     if ((GetFieldValue("new_supplier_price_mykolaiv") != null &&
         GetFieldValue("new_purch_price_mykolaiv") != null) &&
         GetFieldValue("new_offer_status") == 100000001 &&
         GetFieldValue("new_supplier_price_mykolaiv") != 0) {
+
+        if (!(ship_to <= purchase_to) ||
+      !(ship_to >= purchase_of)) {
+            Xrm.Page.getControl("new_purchase_period_of").setNotification("Картка угоди закупівлі не може бути створена! Дата відвантаження ДО раніша ніж Дата закупівлі ВІД!.");
+            Xrm.Page.getControl("new_purchase_period_to").setNotification("Картка угоди закупівлі не може бути створена! Дата відвантаження ДО пізніша ніж Дата закупівлі ДО!.");
+            SetFieldValue("new_offer_status", 100000000);
+            return;
+        }
 
         var supplierN = GetFieldValue("new_supplier_price_mykolaiv");
         var puchasN = GetFieldValue("new_purch_price_mykolaiv");
@@ -128,12 +148,18 @@ softline.CreateDealMethods = function () {
                     var of = GetFieldValue("new_purchase_period_of");
                     of.setHours(timeZone);
                     entity.new_purchase_term_from = of;
+                } else {
+                    Xrm.Page.getControl("new_purchase_period_of").setNotification("Вкажіть дату");
+                    return;
                 }
 
                 if (GetFieldValue("new_purchase_period_to") != null) {
                     var to = GetFieldValue("new_purchase_period_to");
                     to.setHours(timeZone);
                     entity.new_purchase_term_till = to;
+                } else {
+                    Xrm.Page.getControl("new_purchase_period_to").setNotification("Вкажіть дату");
+                    return;
                 }
 
                 if (data != null && data.length != 0) {
@@ -142,6 +168,8 @@ softline.CreateDealMethods = function () {
                             entity.new_ship_portid = { Id: data[i].new_portId, LogicalName: 'new_port' };
                     }
                 }
+
+                entity.new_distances = Xrm.Page.getAttribute('new_distance_mykolaiv').getValue();
 
                 XrmServiceToolkit.Rest.Create(entity,
                     "new_purchase_dealSet",
@@ -164,13 +192,21 @@ softline.CreateDealMethods = function () {
             }, function () { }, false);
         }
         else {
-            alert("Ціна постачальника Миколаїв вища за ціну закупівлі Миколаїв. Картка угоди не може мути створеною.");
+            alert("Ціна постачальника Миколаїв вища за ціну закупівлі Миколаїв. Картка угоди не може бути створеною.");
         }
     }
     if (GetFieldValue("new_supplier_price_odesa") != null &&
         GetFieldValue("new_purch_price_odesa") != null &&
         GetFieldValue("new_offer_status") == 100000001 &&
         GetFieldValue("new_supplier_price_odesa") != 0) {
+
+        if (!(ship_to <= purchase_to) ||
+            !(ship_to >= purchase_of)) {
+            Xrm.Page.getControl("new_purchase_period_of").setNotification("Картка угоди закупівлі не може бути створена! Дата відвантаження ДО раніша ніж Дата закупівлі ВІД!.");
+            Xrm.Page.getControl("new_purchase_period_to").setNotification("Картка угоди закупівлі не може бути створена! Дата відвантаження ДО пізніша ніж Дата закупівлі ДО!.");
+            SetFieldValue("new_offer_status", 100000000);
+            return;
+        }
 
         var supplierO = GetFieldValue("new_supplier_price_odesa");
         var puchaseO = GetFieldValue("new_purch_price_odesa");
@@ -212,12 +248,18 @@ softline.CreateDealMethods = function () {
                     var of = GetFieldValue("new_purchase_period_of");
                     of.setHours(timeZone);
                     entity.new_purchase_term_from = of;
+                } else {
+                    Xrm.Page.getControl("new_purchase_period_of").setNotification("Вкажіть дату");
+                    return;
                 }
 
                 if (GetFieldValue("new_purchase_period_to") != null) {
                     var to = GetFieldValue("new_purchase_period_to");
                     to.setHours(timeZone);
                     entity.new_purchase_term_till = to;
+                } else {
+                    Xrm.Page.getControl("new_purchase_period_to").setNotification("Вкажіть дату");
+                    return;
                 }
 
                 if (data != null && data.length != 0) {
@@ -226,6 +268,8 @@ softline.CreateDealMethods = function () {
                             entity.new_ship_portid = { Id: data[i].new_portId, LogicalName: 'new_port' };
                     }
                 }
+
+                entity.new_distances = Xrm.Page.getAttribute('new_distance_odesa').getValue();
 
                 XrmServiceToolkit.Rest.Create(entity,
                     "new_purchase_dealSet",
@@ -248,7 +292,7 @@ softline.CreateDealMethods = function () {
             }, function () { }, false);
         }
         else {
-            alert("Ціна постачальника Одеса вища за ціну закупівлі Одеса. Картка угоди не може мути створеною.");
+            alert("Ціна постачальника Одеса вища за ціну закупівлі Одеса. Картка угоди не може бути створеною.");
         }
     }
 }
@@ -294,280 +338,199 @@ softline.getInfoFromAccount = function () {
         SetFieldValue("new_city", null);
     }
 }
-/*
-softline.distanceN = function () {
-    //Відстань Миколаїв          new_distance_mykolaiv
-    //Термінал Миколаїв          new_terminal_mykolaivid
-    //Порт Миколаїв              new_mykolaivid
-    //Склад постачальника        new_warehouse
-    //Елеватор постачальника     new_elevator
 
-    var terminalElevator = [];
-    var terminalSklad = [];
-    var portElevator = [];
-    var portSklad = [];
-
-    var terminalElevatorDistamce = 0;
-    var terminalSkladDistamce = 0;
-    var portElevatorDistamce = 0;
-    var portSkladDistamce = 0;
-
-    var new_terminal_mykolaivid = Xrm.Page.getAttribute('new_terminal_mykolaivid').getValue();
-    var new_mykolaivid = Xrm.Page.getAttribute('new_mykolaivid').getValue();
-
-    var new_warehouse = Xrm.Page.getAttribute('new_warehouse').getValue();
-    var new_elevator = Xrm.Page.getAttribute('new_elevator').getValue();
-
-    if (new_terminal_mykolaivid != null) {
-        XrmServiceToolkit.Rest.Retrieve(new_terminal_mykolaivid[0].id, 'new_terminalSet', 'new_cityid', null,
-                                                                                                function (data) {
-                                                                                                    if (data.new_cityid != null && data.new_cityid.Name != null) {
-                                                                                                        terminalSklad.push(data.new_cityid.Name.toString());
-                                                                                                        terminalElevator.push(data.new_cityid.Name.toString());
-                                                                                                    }
-                                                                                                },
-                                                                                                 function (error) {
-                                                                                                     console.log(error.message);
-                                                                                                 }, false);
-
-        if (new_warehouse != null && terminalSklad.length != 0) {
-            XrmServiceToolkit.Rest.Retrieve(new_warehouse[0].id, 'new_warehouseSet', 'new_cityid', null,
-                                                                                                    function (data) {
-                                                                                                        if (data.new_cityid != null && data.new_cityid.Name != null) {
-                                                                                                            terminalSklad.push(data.new_cityid.Name.toString());
-                                                                                                        }
-                                                                                                    },
-                                                                                                     function (error) {
-                                                                                                         console.log(error.message);
-                                                                                                     }, false);
-
-        }
-
-        if (new_elevator != null && terminalSklad.length != 0) {
-            XrmServiceToolkit.Rest.Retrieve(new_elevator[0].id, 'new_elevatorSet', 'new_cityid', null,
-                                                                                                    function (data) {
-                                                                                                        if (data.new_cityid != null && data.new_cityid.Name != null) {
-                                                                                                            terminalElevator.push(data.new_cityid.Name.toString());
-                                                                                                        }
-                                                                                                    },
-                                                                                                     function (error) {
-                                                                                                         console.log(error.message);
-                                                                                                     }, false);
-        }
-    }
-
-    if (new_mykolaivid != null) {
-        XrmServiceToolkit.Rest.Retrieve(new_mykolaivid[0].id, 'new_portSet', 'new_cityid', null,
-                                                                                        function (data) {
-                                                                                            if (data.new_cityid != null && data.new_cityid.Name != null) {
-                                                                                                portElevator.push(data.new_cityid.Name.toString());
-                                                                                                portSklad.push(data.new_cityid.Name.toString());
-                                                                                            }
-                                                                                        },
-                                                                                         function (error) {
-                                                                                             console.log(error.message);
-                                                                                         }, false);
-
-        if (new_warehouse != null && portSklad.length != 0) {
-            XrmServiceToolkit.Rest.Retrieve(new_warehouse[0].id, 'new_warehouseSet', 'new_cityid', null,
-                                                                                                    function (data) {
-                                                                                                        if (data.new_cityid != null && data.new_cityid.Name != null) {
-                                                                                                            portSklad.push(data.new_cityid.Name.toString());
-                                                                                                        }
-                                                                                                    },
-                                                                                                     function (error) {
-                                                                                                         console.log(error.message);
-                                                                                                     }, false);
-
-        }
-
-        if (new_elevator != null && portElevator.length != 0) {
-            XrmServiceToolkit.Rest.Retrieve(new_elevator[0].id, 'new_elevatorSet', 'new_cityid', null,
-                                                                                                    function (data) {
-                                                                                                        if (data.new_cityid != null && data.new_cityid.Name != null) {
-                                                                                                            portElevator.push(data.new_cityid.Name.toString());
-                                                                                                        }
-                                                                                                    },
-                                                                                                     function (error) {
-                                                                                                         console.log(error.message);
-                                                                                                     }, false);
-        }
-    }
-
-
-
-    if (terminalElevator.length == 2) {
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.field = 'new_distance_mykolaiv';
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.pointToDistance = terminalElevator;
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.checkDistance();
-    }
-    if (terminalSklad.length == 2) {
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.field = 'new_distance_mykolaiv';
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.pointToDistance = terminalSklad;
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.checkDistance();
-    }
-    if (portElevator.length == 2) {
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.field = 'new_elevator_nik';
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.pointToDistance = portElevator;
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.checkDistance();
-        pausecomp(100);
-    }
-    if (portSklad.length == 2) {
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.field = 'new_warehouse_nik';        
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.pointToDistance = portSklad;
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.checkDistance();
-        pausecomp(100);
+softline.getPersonalTaskInfo = function () {
+    if (GetFieldValue("new_personal_taskid") != null) {
+        var pt = GetFieldValue("new_personal_taskid");
+        XrmServiceToolkit.Rest.Retrieve(pt[0].id, pt[0].entityType + 'Set', 'new_purchase_period_of,new_purchase_period_to', null,
+            function (data) {
+                SetFieldValue("new_purchase_period_of", data.new_purchase_period_of);
+                SetFieldValue("new_purchase_period_to", data.new_purchase_period_to);
+            },
+        function (error) {
+            console.log(error.message);
+        }, false);
+    } else {
+        SetFieldValue("new_purchase_period_of", null);
+        SetFieldValue("new_purchase_period_to", null);
     }
 }
 
-softline.distanceO = function () {
-    //Відстань Одеса             new_distance_odesa
-    //Термінал Одеса             new_terminal_odesaid
-    //Порт Одеса                 new_odesaid
-    //Склад постачальника        new_warehouse
-    //Елеватор постачальника     new_elevator
 
-    var terminalElevator = [];
-    var terminalSklad = [];
-    var portElevator = [];
-    var portSklad = [];
 
-    var new_terminal_odesaid = Xrm.Page.getAttribute('new_terminal_odesaid').getValue();
-    var new_odesaid = Xrm.Page.getAttribute('new_odesaid').getValue();
 
-    var new_warehouse = Xrm.Page.getAttribute('new_warehouse').getValue();
-    var new_elevator = Xrm.Page.getAttribute('new_elevator').getValue();
 
-    if (new_terminal_odesaid != null) {
-        XrmServiceToolkit.Rest.Retrieve(new_terminal_odesaid[0].id, 'new_terminalSet', 'new_cityid', null,
-                                                                                                function (data) {
-                                                                                                    if (data.new_cityid != null && data.new_cityid.Name != null) {
-                                                                                                        terminalSklad.push(data.new_cityid.Name.toString());
-                                                                                                        terminalElevator.push(data.new_cityid.Name.toString());
-                                                                                                    }
-                                                                                                },
-                                                                                                 function (error) {
-                                                                                                     console.log(error.message);
-                                                                                                 }, false);
 
-        if (new_warehouse != null && terminalSklad.length != 0) {
-            XrmServiceToolkit.Rest.Retrieve(new_warehouse[0].id, 'new_warehouseSet', 'new_cityid', null,
-                                                                                                    function (data) {
-                                                                                                        if (data.new_cityid != null && data.new_cityid.Name != null) {
-                                                                                                            terminalSklad.push(data.new_cityid.Name.toString());
-                                                                                                        }
-                                                                                                    },
-                                                                                                     function (error) {
-                                                                                                         console.log(error.message);
-                                                                                                     }, false);
 
-        }
 
-        if (new_elevator != null && terminalSklad.length != 0) {
-            XrmServiceToolkit.Rest.Retrieve(new_elevator[0].id, 'new_elevatorSet', 'new_cityid', null,
-                                                                                                    function (data) {
-                                                                                                        if (data.new_cityid != null && data.new_cityid.Name != null) {
-                                                                                                            terminalElevator.push(data.new_cityid.Name.toString());
-                                                                                                        }
-                                                                                                    },
-                                                                                                     function (error) {
-                                                                                                         console.log(error.message);
-                                                                                                     }, false);
-        }
-    }
+////////////////
+/* MAP STUFF */
+////////////////
+var retrieveAbstraction = function (id, entityName) {
+    var city_name = undefined;
 
-    if (new_odesaid != null) {
-        XrmServiceToolkit.Rest.Retrieve(new_odesaid[0].id, 'new_portSet', 'new_cityid', null,
-                                                                                        function (data) {
-                                                                                            if (data.new_cityid != null && data.new_cityid.Name != null) {
-                                                                                                portElevator.push(data.new_cityid.Name.toString());
-                                                                                                portSklad.push(data.new_cityid.Name.toString());
-                                                                                            }
-                                                                                        },
-                                                                                         function (error) {
-                                                                                             console.log(error.message);
-                                                                                         }, false);
-
-        if (new_warehouse != null && portSklad.length != 0) {
-            XrmServiceToolkit.Rest.Retrieve(new_warehouse[0].id, 'new_warehouseSet', 'new_cityid', null,
-                                                                                                    function (data) {
-                                                                                                        if (data.new_cityid != null && data.new_cityid.Name != null) {
-                                                                                                            portSklad.push(data.new_cityid.Name.toString());
-                                                                                                        }
-                                                                                                    },
-                                                                                                     function (error) {
-                                                                                                         console.log(error.message);
-                                                                                                     }, false);
-
-        }
-
-        if (new_elevator != null && portElevator.length != 0) {
-            XrmServiceToolkit.Rest.Retrieve(new_elevator[0].id, 'new_elevatorSet', 'new_cityid', null,
-                                                                                                    function (data) {
-                                                                                                        if (data.new_cityid != null && data.new_cityid.Name != null) {
-                                                                                                            portElevator.push(data.new_cityid.Name.toString());
-                                                                                                        }
-                                                                                                    },
-                                                                                                     function (error) {
-                                                                                                         console.log(error.message);
-                                                                                                     }, false);
-        }
-    }
-
-    Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.field = 'new_distance_odesa';
-
-    if (terminalElevator.length == 2) {
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.pointToDistance = terminalElevator;
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.checkDistance();
-    }
-    if (terminalSklad.length == 2) {
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.pointToDistance = terminalSklad;
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.checkDistance();
-    }
-    if (portElevator.length == 2) {
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.pointToDistance = portElevator;
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.checkDistance();
-
-    }
-    if (portSklad.length == 2) {
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.pointToDistance = portSklad;
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.checkDistance();
-    }
-}
-
-softline.deliveryPaymentN = function () {
-    if ((Xrm.Page.getAttribute('new_distance_mykolaiv').getValue() != null ||
-    Xrm.Page.getAttribute('new_distance_mykolaiv').getValue() != 0) &&
-        (Xrm.Page.getAttribute('new_purch_volume_mykolaiv').getValue() != null &&
-    Xrm.Page.getAttribute('new_purch_volume_mykolaiv').getValue() != 0)) {
-        XrmServiceToolkit.Rest.RetrieveMultiple('new_constantSet', '', function (data) {
-            if (data.length != 0) {
-                if (data[0].new_ton_km_cost != null) {
-                    SetFieldValue('new_ship_cost_mykolaiv', data[0].new_ton_km_cost.Value * Xrm.Page.getAttribute('new_distance_mykolaiv').getValue() * Xrm.Page.getAttribute('new_purch_volume_mykolaiv').getValue());
-                }
+    XrmServiceToolkit.Rest.Retrieve(
+        id, entityName, 'new_cityid, new_regionid', null,
+        function (data) {
+            if (data.new_cityid != null && data.new_cityid.Name != null) {
+                city_name = data.new_cityid.Name.toString();
+            }
+            if (data.new_regionid && data.new_regionid.Name) {
+                city_name = data.new_regionid.Name + ' область, ' + city_name;
             }
         },
-                     function (error) {
-                         console.log(error.message);
-                     },
-                     function onComplete() {
-                     }, false
-                 );
+        function (error) {
+            console.log(error.message);
+        }, false);
+
+    return city_name;
+};
+
+var retrieveTerminalCity = function (terminalId) {
+    return retrieveAbstraction(terminalId, 'new_terminalSet');
+};
+
+var retrieveWarehouseCity = function (warehouseId) {
+    return retrieveAbstraction(warehouseId, 'new_warehouseSet');
+};
+
+var retrieveElevatorCity = function (elevatorId) {
+    return retrieveAbstraction(elevatorId, 'new_elevatorSet');
+};
+
+var retrievePortCity = function (portId) {
+    return retrieveAbstraction(portId, 'new_portSet');
+};
+
+softline.distance = function () {
+    var new_warehouse = Xrm.Page.getAttribute('new_warehouse').getValue();
+    var new_elevator = Xrm.Page.getAttribute('new_elevator').getValue();
+    var new_terminal_odesaid = Xrm.Page.getAttribute('new_terminal_odesaid').getValue();
+    var new_terminal_mykolaivid = Xrm.Page.getAttribute('new_terminal_mykolaivid').getValue();
+
+    var warehouseCity,
+        elevatorCity,
+        odesaTerminalCity,
+        mykolaivTerminalCity,
+        odesaPortCity = "Одеса",
+        mykolaivPortCity = "Миколаїв";
+    if (new_warehouse != null) {
+        var warehouseCity = retrieveWarehouseCity(new_warehouse[0].id);
     }
-    softline.distanceO();
-}
+
+    if (new_elevator != null) {
+        var elevatorCity = retrieveElevatorCity(new_elevator[0].id);
+    }
+
+    if (new_terminal_odesaid != null) {
+        var odesaTerminalCity = retrieveTerminalCity(new_terminal_odesaid[0].id);
+    }
+
+    if (new_terminal_mykolaivid != null) {
+        var mykolaivTerminalCity = retrieveTerminalCity(new_terminal_mykolaivid[0].id);
+    }
+
+    var paths = [];
+    var group = function (from, to) {
+        if (from && to) {
+            paths.push([from, to]);
+            return [from, to];
+        }
+        return null;
+    };
+
+    var namedPaths = {
+        odesaElevator: group(odesaTerminalCity || odesaPortCity, elevatorCity),
+        odesaSklad: group(odesaTerminalCity || odesaPortCity, warehouseCity),
+        mykolaivElevator: group(mykolaivTerminalCity || mykolaivPortCity, elevatorCity),
+        mykolaivSklad: group(mykolaivTerminalCity || mykolaivPortCity, warehouseCity),
+    };
+
+    var toNamed = function (distances, namedPaths) {
+        var named = {};
+        var i = 0;
+        for (var path in namedPaths) {
+            if (!namedPaths[path]) {
+                continue;
+            }
+            named[path] = distances[i];
+            i += 1;
+        }
+
+        return named;
+    };
+
+    Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window
+        .getDistances(paths)
+        .then(function (distances) {
+            console.log(distances);
+
+            var named = toNamed(distances, namedPaths);
+            console.log(named);
+
+            var odesa_distance = Math.max(named.odesaElevator || 0, named.odesaSklad || 0);
+            var nikolaev_distance = Math.max(named.mykolaivElevator || 0, named.mykolaivSklad || 0);
+            console.log(odesa_distance, nikolaev_distance);
+
+            Xrm.Page.getAttribute('new_distance_mykolaiv').setValue(nikolaev_distance);
+            Xrm.Page.getAttribute('new_distance_odesa').setValue(odesa_distance);
+            Xrm.Page.getAttribute('new_distance_mykolaiv').fireOnChange();
+            Xrm.Page.getAttribute('new_distance_odesa').fireOnChange();
+        });
+};
+
+softline.deliveryPaymentN = function () {
+    /*if (Xrm.Page.getAttribute('new_distance_mykolaiv').getValue() != null &&
+        Xrm.Page.getAttribute('new_distance_odesa').getValue() == null) {
+        do {
+            softline.distanceO();
+        } while (Xrm.Page.getAttribute('new_distance_odesa').getValue() != null);
+    }*/
+
+    if (Xrm.Page.getAttribute('new_distance_mykolaiv').getValue() != null ||
+        Xrm.Page.getAttribute('new_distance_mykolaiv').getValue() != 0) {
+
+        XrmServiceToolkit.Rest.RetrieveMultiple('new_constantSet', '',
+            function (data) {
+                if (data.length != 0) {
+                    if (data[0].new_ton_km_cost != null) {
+                        SetFieldValue('new_ship_cost_mykolaiv',
+                            data[0].new_ton_km_cost.Value *
+                            Xrm.Page.getAttribute('new_distance_mykolaiv').getValue());
+                        Xrm.Page.getAttribute('new_ship_cost_mykolaiv').fireOnChange();
+                    }
+                }
+            },
+            function (error) {
+                console.log(error.message);
+            },
+            function onComplete() { },
+            false
+        );
+    }
+    //softline.distanceO();
+};
 
 softline.deliveryPaymentO = function () {
-    if ((Xrm.Page.getAttribute('new_distance_odesa').getValue() != null &&
-    Xrm.Page.getAttribute('new_distance_odesa').getValue() != 0) &&
-        (Xrm.Page.getAttribute('new_purch_volume_odesa').getValue() != null &&
-    Xrm.Page.getAttribute('new_purch_volume_odesa').getValue() != 0)) {
+    /*if (Xrm.Page.getAttribute('new_distance_odesa').getValue() != null &&
+        Xrm.Page.getAttribute('new_distance_mykolaiv').getValue() == null) {
+        do {
+            softline.distanceN();
+        } while (Xrm.Page.getAttribute('new_distance_odesa').getValue() != null);
+    }*/
+
+    if (Xrm.Page.getAttribute('new_distance_odesa').getValue() != null &&
+        Xrm.Page.getAttribute('new_distance_odesa').getValue() != 0) {
+
         XrmServiceToolkit.Rest.RetrieveMultiple('new_constantSet',
             '',
             function (data) {
                 if (data.length != 0) {
                     if (data[0].new_ton_km_cost != null) {
-                        SetFieldValue('new_ship_cost_odesa', data[0].new_ton_km_cost.Value * Xrm.Page.getAttribute('new_distance_odesa').getValue() * Xrm.Page.getAttribute('new_purch_volume_odesa').getValue());
+                        SetFieldValue('new_ship_cost_odesa',
+                            data[0].new_ton_km_cost.Value *
+                            Xrm.Page.getAttribute('new_distance_odesa').getValue());
+                        Xrm.Page.getAttribute('new_ship_cost_odesa').fireOnChange();
                     }
                 }
             },
@@ -578,80 +541,7 @@ softline.deliveryPaymentO = function () {
             },
             false);
     }
-}
-*/
-
-softline.yMapLoader = function () {
-    var checkpoint = [];
-
-    var warehouse,
-        elevator,
-        port,
-        terminal;
-
-    warehouse = Xrm.Page.getAttribute('new_warehouse').getValue();
-    elevator = Xrm.Page.getAttribute('new_elevator_purchase').getValue();
-    port = Xrm.Page.getAttribute('new_port').getValue();
-    terminal = Xrm.Page.getAttribute('new_terminal').getValue();
-
-    if (warehouse != null) {
-        XrmServiceToolkit.Rest.Retrieve(warehouse[0].id, 'new_warehouseSet', 'new_cityid', null,
-    function (data) {
-        if (data.new_cityid != null && data.new_cityid.Name != null) {
-            warehouse = data.new_cityid.Name.toString();
-            checkpoint.push(warehouse);
-        }
-    },
-     function (error) {
-         console.log(error.message);
-     }, false);
-
-    }
-    if (elevator != null) {
-        XrmServiceToolkit.Rest.Retrieve(elevator[0].id, 'new_elevatorSet', 'new_cityid', null,
-    function (data) {
-        if (data.new_cityid != null && data.new_cityid.Name != null) {
-            elevator = data.new_cityid.Name.toString();
-            checkpoint.push(elevator);
-        }
-    },
-     function (error) {
-         console.log(error.message);
-     }, false);
-    }
-    if (port != null) {
-        XrmServiceToolkit.Rest.Retrieve(port[0].id, 'new_portSet', 'new_cityid', null,
-    function (data) {
-        if (data.new_cityid != null && data.new_cityid.Name != null) {
-            port = data.new_cityid.Name.toString();
-            checkpoint.push(port);
-        }
-    },
-     function (error) {
-         console.log(error.message);
-     }, false);
-    }
-    if (terminal != null) {
-        XrmServiceToolkit.Rest.Retrieve(terminal[0].id, 'new_terminalSet', 'new_cityid', null,
-    function (data) {
-        if (data.new_cityid != null && data.new_cityid.Name != null) {
-            terminal = data.new_cityid.Name.toString();
-            checkpoint.push(terminal);
-        }
-    },
-     function (error) {
-         console.log(error.message);
-     }, false);
-    }
-    if (checkpoint.length != 0 && checkpoint.length != 1) {
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.field = 'new_distance';
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.point1 = checkpoint;
-        Xrm.Page.getControl('WebResource_yMap').getObject().contentWindow.window.init();
-    }
-    else {
-        Xrm.Page.getAttribute('new_distance').setValue(0);
-    }
-}
+};
 
 softline.railRoadPricing = function () {
     var notify = function () {
@@ -758,6 +648,40 @@ softline.setShippingCostIfRailroad = function () {
     SetFieldValue('new_ship_cost_mykolaiv', new_elevator_service_cost + shipCostMyk);
     SetFieldValue('new_ship_cost_odesa', new_elevator_service_cost + shipCostOdessa);
 };
+
+softline.purchasePriceMykolaiv = function () {
+    var new_recom_price_mykolaiv = Xrm.Page.getAttribute('new_recom_price_mykolaiv').getValue() || 0;
+    var new_ship_cost_mykolaiv = Xrm.Page.getAttribute('new_ship_cost_mykolaiv').getValue() || 0;
+    var new_total_elevator_service_1tn_cost = Xrm.Page.getAttribute('new_total_elevator_service_1tn_cost').getValue() || 0;
+    SetFieldValue(
+      'new_purch_price_mykolaiv',
+      new_recom_price_mykolaiv - new_ship_cost_mykolaiv);
+    Xrm.Page.getAttribute('new_purch_price_mykolaiv').fireOnChange();
+};
+
+softline.purchasePriceOdesa = function () {
+    var new_recom_price_odesa = Xrm.Page.getAttribute('new_recom_price_odesa').getValue() || 0;
+    var new_ship_cost_odesa = Xrm.Page.getAttribute('new_ship_cost_odesa').getValue() || 0;
+    var new_total_elevator_service_1tn_cost = Xrm.Page.getAttribute('new_total_elevator_service_1tn_cost').getValue() || 0;
+    SetFieldValue(
+      'new_purch_price_odesa',
+      new_recom_price_odesa - new_ship_cost_odesa);
+    Xrm.Page.getAttribute('new_purch_price_odesa').fireOnChange();
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function SetFieldValue(FieldName, value) {
     Xrm.Page.getAttribute(FieldName).setSubmitMode("always");

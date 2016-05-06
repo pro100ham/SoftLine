@@ -77,5 +77,10 @@ namespace SoftLine.UA.CurrencyService
                 eventLog2.WriteEntry(ex.Message);
             }
         }
+
+        private void eventLog2_EntryWritten(object sender, EntryWrittenEventArgs e)
+        {
+
+        }
     }
 }

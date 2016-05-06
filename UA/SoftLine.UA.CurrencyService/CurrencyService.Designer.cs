@@ -31,6 +31,10 @@
             this.eventLog2 = new System.Diagnostics.EventLog();
             ((System.ComponentModel.ISupportInitialize)(this.eventLog2)).BeginInit();
             // 
+            // eventLog2
+            // 
+            this.eventLog2.EntryWritten += new System.Diagnostics.EntryWrittenEventHandler(this.eventLog2_EntryWritten);
+            // 
             // CurrencyService
             // 
             this.ServiceName = "CurrencyService";
