@@ -57,6 +57,9 @@ softline.onLoad = function () {
     Xrm.Page.getAttribute('new_period_ship_from').addOnChange(softline.checkDate);
     Xrm.Page.getAttribute('new_period_ship_to').addOnChange(softline.checkDate);
     Xrm.Page.getAttribute('new_purchase_amount').addOnChange(softline.checkDate);
+
+    Xrm.Page.getAttribute('new_purchase_term_from').addOnChange(softline.checkDate);
+    Xrm.Page.getAttribute('new_purchase_term_till').addOnChange(softline.checkDate);
 };
 
 softline.getPersonalTaskInfo = function () {
@@ -111,23 +114,20 @@ softline.getTotalsPurchase = function () {
 }
 
 softline.checkDate = function () {
-    var ship_from = GetFieldValue('new_period_ship_from');
     var ship_to = GetFieldValue('new_period_ship_to');
-    var purchase_of = GetFieldValue('new_purchase_period_from_purchase_task');
-    var purchase_to = GetFieldValue('new_purchase_period_till_purchase_task');
+    var purchase_of = GetFieldValue('new_purchase_term_from');
+    var purchase_to = GetFieldValue('new_purchase_term_till');
 
     var supplier = GetFieldValue('new_purchase_amount');
     var rest = GetFieldValue('new_rest_to_purchase_total');
 
-    if (!(ship_to <= purchase_to)) {
+    if (ship_to > purchase_to) {
         Xrm.Page.getControl("new_period_ship_to").setNotification("Помилка! Період відвантаження ДО пізніший ніж Період закупівлі ДО!.");
+    }
+    else if (ship_to < purchase_of) {
+        Xrm.Page.getControl("new_period_ship_to").setNotification("Помилка! Період відвантаження ДО раніший ніж Період закупівлі ВІД!.");
     } else {
         Xrm.Page.getControl("new_period_ship_to").clearNotification();
-    }
-    if (!(ship_to >= purchase_of)) {
-        Xrm.Page.getControl("new_period_ship_from").setNotification("Помилка! Період відвантаження ДО раніший ніж Період закупівлі ВІД!.");
-    } else {
-        Xrm.Page.getControl("new_period_ship_from").clearNotification();
     }
 
     if (supplier > rest) {
