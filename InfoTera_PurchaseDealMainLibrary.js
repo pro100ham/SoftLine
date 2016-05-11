@@ -51,6 +51,9 @@ softline.onLoad = function () {
     softline.getTotalsPurchase();
 
     softline.getPersonalTaskInfo();
+    Xrm.Page.getAttribute('new_ship_portid').addOnChange(softline.getTotalsPurchase);
+    Xrm.Page.getAttribute('new_cropid').addOnChange(softline.getTotalsPurchase);
+
     Xrm.Page.getAttribute('new_purchase_task').addOnChange(softline.getPersonalTaskInfo);
 
     Xrm.Page.getAttribute('new_purchase_task').addOnChange(softline.checkDate);
@@ -80,36 +83,39 @@ softline.getPersonalTaskInfo = function () {
 }
 
 softline.getTotalsPurchase = function () {
-    var port = GetFieldValue('new_ship_portid');
-    var crop = GetFieldValue('new_cropid');
-    if (port != null &&
-        crop != null) {
-        var fetchXml = "<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false' aggregate='true' >" +
-            "    <entity name='new_purchase_order' >" +
-            "        <attribute name='new_status_perform' aggregate='SUM' alias='total' />" +
-            "        <filter type='and' >" +
-            "            <condition attribute='new_portid' operator='eq' value='" + port[0].id + "' />" +
-            "            <condition attribute='new_cropid' operator='eq' value='" + crop[0].id + "' />" +
-            "            <condition attribute='new_status' operator='in' >" +
-            "                <value>" +
-            "                    100000000" +
-            "                </value>" +
-            "                <value>" +
-            "                    100000005" +
-            "                </value>" +
-            "                <value>" +
-            "                    100000003" +
-            "                </value>" +
-            "                <value>" +
-            "                    100000001" +
-            "                </value>" +
-            "            </condition>" +
-            "        </filter>" +
-            "    </entity>" +
-            "</fetch>";
-        XrmServiceToolkit.Soap.Fetch(fetchXml, true, function (data) {
-            SetFieldValue('new_rest_to_purchase_total', data[0].attributes.total.value);
-        });
+    if (GetFieldValue('new_opportunity_status') == 100000000) {
+        var port = GetFieldValue('new_ship_portid');
+        var crop = GetFieldValue('new_cropid');
+        if (port != null &&
+            crop != null) {
+            SetFieldValue('new_rest_to_purchase_total', 0);
+            var fetchXml = "<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false' aggregate='true' >" +
+                "    <entity name='new_purchase_order' >" +
+                "        <attribute name='new_status_perform' aggregate='SUM' alias='total' />" +
+                "        <filter type='and' >" +
+                "            <condition attribute='new_portid' operator='eq' value='" + port[0].id + "' />" +
+                "            <condition attribute='new_cropid' operator='eq' value='" + crop[0].id + "' />" +
+                "            <condition attribute='new_status' operator='in' >" +
+                "                <value>" +
+                "                    100000000" +
+                "                </value>" +
+                "                <value>" +
+                "                    100000005" +
+                "                </value>" +
+                "                <value>" +
+                "                    100000003" +
+                "                </value>" +
+                "                <value>" +
+                "                    100000001" +
+                "                </value>" +
+                "            </condition>" +
+                "        </filter>" +
+                "    </entity>" +
+                "</fetch>";
+            XrmServiceToolkit.Soap.Fetch(fetchXml, true, function(data) {
+                SetFieldValue('new_rest_to_purchase_total', data[0].attributes.total.value);
+            });
+        }
     }
 }
 

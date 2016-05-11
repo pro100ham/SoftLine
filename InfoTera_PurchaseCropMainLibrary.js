@@ -57,6 +57,9 @@ softline.onLoad = function () {
 
     Xrm.Page.getAttribute('new_personal_taskid').addOnChange(softline.getPersonalTaskInfo);
     softline.getTotalsPurchase();
+    Xrm.Page.getAttribute('new_odesaid').addOnChange(softline.getTotalsPurchase);
+    Xrm.Page.getAttribute('new_mykolaivid').addOnChange(softline.getTotalsPurchase);
+    Xrm.Page.getAttribute('new_crop').addOnChange(softline.getTotalsPurchase);
     Xrm.Page.getAttribute('new_period_ship_from').addOnChange(softline.CreateDealMethods);
     Xrm.Page.getAttribute('new_period_ship_to').addOnChange(softline.CreateDealMethods);
     Xrm.Page.getAttribute('new_purchase_period_to').addOnChange(softline.CreateDealMethods);
@@ -387,53 +390,62 @@ softline.getPersonalTaskInfo = function () {
 }
 
 softline.getTotalsPurchase = function () {
-    var portM = GetFieldValue('new_mykolaivid');
-    var portO = GetFieldValue('new_odesaid');
-    var crop = GetFieldValue('new_crop');
-    if (portM != null &&
-        portO != null &&
-        crop != null) {
-        var fetchXml = "<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false' aggregate='true' >" +
-            "    <entity name='new_purchase_order' >" +
-            "        <attribute name='new_status_perform' aggregate='SUM' alias='total' />" +
-            "        <attribute name='new_portid' alias='portid' groupby='true' />" +
-            "        <filter type='and' >" +
-            "            <condition attribute='new_portid' operator='in' >" +
-            "                <value uitype='new_port' >" +
-            "                    " + portM[0].id + "" +
-            "                </value>" +
-            "                <value uitype='new_port' >" +
-            "                    " + portO[0].id + "" +
-            "                </value>" +
-            "            </condition>" +
-            "            <condition attribute='new_cropid' operator='eq' value='" + crop[0].id + "' />" +
-            "            <condition attribute='new_status' operator='in' >" +
-            "                <value>" +
-            "                    100000000" +
-            "                </value>" +
-            "                <value>" +
-            "                    100000005" +
-            "                </value>" +
-            "                <value>" +
-            "                    100000003" +
-            "                </value>" +
-            "                <value>" +
-            "                    100000001" +
-            "                </value>" +
-            "            </condition>" +
-            "        </filter>" +
-            "    </entity>" +
-            "</fetch>";
-        XrmServiceToolkit.Soap.Fetch(fetchXml, true, function (data) {
-            data.forEach(function (item, index) {
-                if (item.attributes.portid_new_portidname.value.startsWith("Миколаїв")) {
-                    SetFieldValue('new_rest_to_purchase_mykolaiv_total', item.attributes.total.value);
-                }
-                if (item.attributes.portid_new_portidname.value.startsWith("Одеса")) {
-                    SetFieldValue('new_rest_to_purchase_odesa_total', item.attributes.total.value);
+    if (GetFieldValue('new_offer_status') == 100000000) {
+        var portM = GetFieldValue('new_mykolaivid');
+        var portO = GetFieldValue('new_odesaid');
+        var crop = GetFieldValue('new_crop');
+        if (portM != null &&
+            portO != null &&
+            crop != null) {
+            var fetchXml = "<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false' aggregate='true' >" +
+                "    <entity name='new_purchase_order' >" +
+                "        <attribute name='new_status_perform' aggregate='SUM' alias='total' />" +
+                "        <attribute name='new_portid' alias='portid' groupby='true' />" +
+                "        <filter type='and' >" +
+                "            <condition attribute='new_portid' operator='in' >" +
+                "                <value uitype='new_port' >" +
+                "                    " + portM[0].id + "" +
+                "                </value>" +
+                "                <value uitype='new_port' >" +
+                "                    " + portO[0].id + "" +
+                "                </value>" +
+                "            </condition>" +
+                "            <condition attribute='new_cropid' operator='eq' value='" + crop[0].id + "' />" +
+                "            <condition attribute='new_status' operator='in' >" +
+                "                <value>" +
+                "                    100000000" +
+                "                </value>" +
+                "                <value>" +
+                "                    100000005" +
+                "                </value>" +
+                "                <value>" +
+                "                    100000003" +
+                "                </value>" +
+                "                <value>" +
+                "                    100000001" +
+                "                </value>" +
+                "            </condition>" +
+                "        </filter>" +
+                "    </entity>" +
+                "</fetch>";
+            XrmServiceToolkit.Soap.Fetch(fetchXml, true, function (data) {
+                if (data.length > 0) {
+                    SetFieldValue('new_rest_to_purchase_mykolaiv_total', 0);
+                    SetFieldValue('new_rest_to_purchase_odesa_total', 0);
+                    data.forEach(function (item, index) {
+                        if (item.attributes.portid_new_portidname.value.startsWith("Миколаїв")) {
+                            SetFieldValue('new_rest_to_purchase_mykolaiv_total', item.attributes.total.value);
+                        }
+                        if (item.attributes.portid_new_portidname.value.startsWith("Одеса")) {
+                            SetFieldValue('new_rest_to_purchase_odesa_total', item.attributes.total.value);
+                        }
+                    });
+                } else {
+                    SetFieldValue('new_rest_to_purchase_mykolaiv_total', 0);
+                    SetFieldValue('new_rest_to_purchase_odesa_total', 0);
                 }
             });
-        });
+        }
     }
 }
 
