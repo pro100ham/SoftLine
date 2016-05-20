@@ -50,7 +50,13 @@ namespace SoftLine.InfoTera.MonitoringPrice
                 {
                     var haveAprove = CheckaprovedEntity(orgContext, correnctEntity.new_cropid.Id);
                     var currency = getCurrency(orgContext) ?? 0;
-                    var margin = getMargin(orgContext) ?? new Money(0);
+                    new_constant cons = getConstanta(orgContext);
+
+                    if (cons == null)
+                        throw new InvalidPluginExecutionException("Створіть запис константи");
+
+                    var margin = cons.new_purchase_margin ?? new Money(0);
+                    var coefficient = cons.GetAttributeValue<double?>("new_vat_return_coefficient") ?? 1;
                     double nikolaevUSD = 0;
                     Money nikolaevRec = new Money(0);
                     double odesaUSD = 0;
@@ -61,16 +67,16 @@ namespace SoftLine.InfoTera.MonitoringPrice
                     if ( correnctEntity.new_purchase_price_nikolaev != null &&
                         correnctEntity.new_purchase_price_nikolaev.Value != 0 )
                     {
-                        nikolaevUSD = (double) correnctEntity.new_purchase_price_nikolaev?.Value / currency;
+                        nikolaevUSD = ((double) correnctEntity.new_purchase_price_nikolaev?.Value / currency)* coefficient;
                         nikolaevRec = new Money(correnctEntity.new_purchase_price_nikolaev.Value - margin.Value);
-                        nikolaevRecUSD = (double) nikolaevRec.Value / currency;
+                        nikolaevRecUSD = ((double) nikolaevRec.Value / currency) * coefficient;
                     }
                     if ( correnctEntity.new_purchase_price_odessa != null &&
                         correnctEntity.new_purchase_price_odessa.Value != 0 )
                     {
-                        odesaUSD = (double) correnctEntity.new_purchase_price_odessa?.Value / currency;
+                        odesaUSD = ((double) correnctEntity.new_purchase_price_odessa?.Value / currency)* coefficient;
                         odesaRec = new Money(correnctEntity.new_purchase_price_odessa.Value - margin.Value);
-                        odesaRecUSD = (double) odesaRec.Value / currency;
+                        odesaRecUSD = ((double) odesaRec.Value / currency)*coefficient;
                     }
 
                     if ( haveAprove == null )
@@ -221,10 +227,10 @@ namespace SoftLine.InfoTera.MonitoringPrice
             }
         }
 
-        private Money getMargin(OrganizationServiceContext orgContext)
+        private new_constant getConstanta(OrganizationServiceContext orgContext)
         {
             return (from com in orgContext.CreateQuery<new_constant>()
-                    select com.new_purchase_margin).FirstOrDefault();
+                    select com).FirstOrDefault();
         }
 
         private double? getCurrency(OrganizationServiceContext orgContext)
